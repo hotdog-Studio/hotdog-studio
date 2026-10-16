@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-fixtures/
+.astro/
+reports/
+src/generated/
+public/photos/
+.cache/
+test-results/
+.env
+.env.*

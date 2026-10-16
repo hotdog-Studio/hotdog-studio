@@ -1,0 +1,11 @@
+docs
+dist
+dist-fixtures
+.astro
+reports
+src/generated
+public/photos
+fixtures/photos
+package-lock.json
+# Scratch workspace. Its own nested .gitignore keeps it out of git, but Prettier does not read that.
+.superpowers

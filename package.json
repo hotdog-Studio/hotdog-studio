@@ -1,0 +1,41 @@
+{
+  "name": "hotdog-studio",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.16.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:fixtures": "cross-env SITE_MODE=fixtures npm run build",
+    "preview:fixtures": "cross-env SITE_MODE=fixtures astro preview --port 4321 --ignore-lock",
+    "lint": "astro check && eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "astro": "7.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "cross-env": "10.1.0",
+    "eslint": "10.13.0",
+    "eslint-plugin-astro": "3.2.1",
+    "eslint-plugin-playwright": "2.12.1",
+    "globals": "17.13.0",
+    "linkedom": "0.18.13",
+    "mdast-util-from-markdown": "2.1.0",
+    "mdast-util-to-string": "4.0.0",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5",
+    "yaml": "2.9.1"
+  }
+}
