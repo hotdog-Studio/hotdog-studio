@@ -50,6 +50,22 @@ describe('parseStudy', () => {
       parseStudy('a.md', md('title: A\nfeatured: true\nfeaturedOrder: 1').replaceAll('\n', '\r\n')),
     ).toEqual(parseStudy('a.md', md('title: A\nfeatured: true\nfeaturedOrder: 1')));
   });
+  it('reads a file with a UTF-8 BOM and CRLF endings the same as plain LF', () => {
+    // No blank line after the frontmatter, so a body offset that is off by one would eat a `#`.
+    const front = '---\ntitle: A\ndraft: true\nfeatured: true\nfeaturedOrder: 1\n---\n';
+    const lf = `${front}${SECTIONS}\n<!-- prompt: fill me in -->\n`;
+    const bomCrlf = `\uFEFF${lf.replaceAll('\n', '\r\n')}`;
+    expect(parseStudy('a.md', bomCrlf)).toEqual(parseStudy('a.md', lf));
+    // The comparison only means something if every field has a non-default value.
+    expect(parseStudy('a.md', lf)).toEqual({
+      file: 'a.md',
+      draft: true,
+      featured: true,
+      featuredOrder: 1,
+      h2s: [...REQUIRED_H2S],
+      hasPromptMarker: true,
+    });
+  });
   it('accepts a curly apostrophe in "What I’d change"', () => {
     expect(
       parsed('a.md', 'title: A', SECTIONS.replace("What I'd change", 'What I’d change')).h2s,

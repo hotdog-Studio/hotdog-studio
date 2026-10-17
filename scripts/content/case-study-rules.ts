@@ -54,7 +54,8 @@ function splitFrontmatter(
  * exactly `true` (or a number, for `featuredOrder`) is simply not counted here.
  */
 export function parseStudy(file: string, source: string): ParsedStudy {
-  const frontmatter = splitFrontmatter(source);
+  // Windows editors can save a UTF-8 BOM. Node keeps it as U+FEFF, which hides the opening `---`.
+  const frontmatter = splitFrontmatter(source.replace(/^\uFEFF/, ''));
   if (frontmatter === undefined) {
     throw new Error(`${file}: frontmatter is missing or not valid YAML`);
   }
