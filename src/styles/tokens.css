@@ -1,0 +1,44 @@
+/*
+ * Design tokens (spec §7). Neutral greys plus one mustard accent, for links, focus rings and
+ * badges. Text, muted text and the accent all reach 4.5:1 on --color-bg and --color-surface in
+ * both themes. The theme follows prefers-color-scheme only; there is no toggle.
+ */
+:root {
+  color-scheme: light dark;
+
+  --color-bg: #ffffff;
+  --color-surface: #f6f6f4;
+  --color-text: #1a1a1a;
+  --color-text-muted: #555555;
+  --color-border: #dddddd;
+  --color-accent: #8a6500;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /*
+   * Fluid type scale: 16px body text with a 1.2 ratio at a 320px viewport, growing to 18px with a
+   * 1.25 ratio at 1280px. Each step is in rem at both ends, so it follows the reader's font size.
+   */
+  --step--1: clamp(0.8333rem, 0.8111rem + 0.1111vw, 0.9rem);
+  --step-0: clamp(1rem, 0.9583rem + 0.2083vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1312rem + 0.3438vw, 1.4063rem);
+  --step-2: clamp(1.44rem, 1.3341rem + 0.5297vw, 1.7578rem);
+  --step-3: clamp(1.728rem, 1.5716rem + 0.7821vw, 2.1973rem);
+  --step-4: clamp(2.0736rem, 1.8493rem + 1.1216vw, 2.7466rem);
+
+  --measure: 70ch;
+  --wide: 1400px;
+  --gutter: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #111111;
+    --color-surface: #1c1c1c;
+    --color-text: #ededed;
+    --color-text-muted: #a8a8a8;
+    --color-border: #333333;
+    --color-accent: #f2c230;
+  }
+}

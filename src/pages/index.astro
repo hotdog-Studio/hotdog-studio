@@ -1,11 +1,8 @@
-<html lang="en-GB">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Thomas Southcott</title>
-  </head>
-  <body>
-    <h1>Thomas Southcott</h1>
-  </body>
-</html>
+---
+import site from '@site-config';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout description={site.pitch}>
+  <h1>{site.name}</h1>
+</BaseLayout>

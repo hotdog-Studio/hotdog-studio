@@ -1,0 +1,105 @@
+---
+import { isCurrent, NAV_ITEMS } from '../lib/nav';
+
+interface Props {
+  name: string;
+  pathname: string;
+}
+
+const { name, pathname } = Astro.props;
+---
+
+<a class="skip-link" href="#main">
+  Skip to content
+</a>
+<header class="site-header frame">
+  <div class="brand">
+    <a class="home" href="/">
+      {name}
+    </a>
+    <span class="wordmark" aria-hidden="true">
+      hotdog<span class="dot">.</span>studio
+    </span>
+  </div>
+  <nav aria-label="Main">
+    <ul>
+      {NAV_ITEMS.map((item) => (
+        <li>
+          <a href={item.href} aria-current={isCurrent(pathname, item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 2rem;
+    padding-block: clamp(1.25rem, 1rem + 1.25vw, 2.25rem) 0;
+  }
+
+  .brand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.75rem;
+  }
+
+  .home {
+    padding-block: 0.25rem;
+    color: var(--color-text);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration-line: none;
+  }
+
+  .home:hover {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
+  /* A stand-in for the hotdog.studio icon (spec §15), with a dab of mustard on the dot. */
+  .wordmark {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+  }
+
+  .dot {
+    color: var(--color-accent);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--color-text-muted);
+    text-decoration-line: none;
+  }
+
+  nav a:hover {
+    color: var(--color-text);
+  }
+
+  nav a[aria-current='page'] {
+    color: var(--color-text);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35em;
+  }
+</style>

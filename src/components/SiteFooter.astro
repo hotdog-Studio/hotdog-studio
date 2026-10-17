@@ -1,0 +1,77 @@
+---
+import type { SiteConfig } from '../lib/site-config-schema';
+
+interface Props {
+  links: SiteConfig['links'];
+  email: string;
+  buildStamp: string;
+}
+
+const { links, email, buildStamp } = Astro.props;
+
+const contactLinks = [
+  { label: 'GitHub', href: links.github },
+  { label: 'LinkedIn', href: links.linkedin },
+  { label: 'Email', href: `mailto:${email}` },
+  { label: 'Reel Raffle', href: links.reelRaffle },
+];
+---
+
+<footer class="site-footer frame">
+  <ul class="contact">
+    {contactLinks.map(({ label, href }) => (
+      <li>
+        <a href={href}>{label}</a>
+      </li>
+    ))}
+  </ul>
+  <div class="provenance">
+    <p>
+      <a href="/quality">Built with Astro, tested with Playwright</a>
+    </p>
+    <p class="build-stamp">{buildStamp}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding-block: 1.5rem clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+    border-block-start: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The padding lifts each link to a 24px target (WCAG 2.5.8) at this small size. */
+  a {
+    display: inline-block;
+    padding-block: 0.25rem;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .build-stamp {
+    font-family: var(--font-mono);
+  }
+
+  @media (min-width: 48rem) {
+    .provenance {
+      text-align: end;
+    }
+  }
+</style>
