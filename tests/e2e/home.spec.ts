@@ -50,7 +50,18 @@ test('the Reel Raffle card links to the product and to its published case study'
   );
 });
 
-test('ships no client-side JavaScript', async ({ page }) => {
+test('a featured card opens its case study', async ({ page }) => {
+  const home = new HomePage(page);
+  await home.goto();
+  await home.featured.getByRole('link', { name: 'Fixture public study', exact: true }).click();
+  await expect(page).toHaveURL('/work/fixture-public');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(['Fixture public study']);
+});
+
+test('declares en-GB and ships no client-side JavaScript or inline styles', async ({ page }) => {
   await new HomePage(page).goto();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB');
   await expect(page.locator('script')).toHaveCount(0);
+  await expect(page.locator('[style]')).toHaveCount(0);
+  await expect(page.locator('style')).toHaveCount(0);
 });

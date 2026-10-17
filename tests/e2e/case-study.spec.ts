@@ -45,10 +45,16 @@ test('renders the six sections in order', async ({ page }) => {
   ]);
 });
 
-test('highlights code at build time and ships no JavaScript', async ({ page }) => {
+test('highlights code at build time, declares en-GB and ships no client-side JavaScript or inline styles', async ({
+  page,
+}) => {
   await new CaseStudyPage(page).goto('fixture-public');
   await expect(page.locator('article.prose pre code .token').first()).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB');
   await expect(page.locator('script')).toHaveCount(0);
+  // Prism, unlike Shiki, writes classes only, so the token colours need no inline styles.
+  await expect(page.locator('[style]')).toHaveCount(0);
+  await expect(page.locator('style')).toHaveCount(0);
 });
 
 test('Work stays the current page in the header on a case study', async ({ page }) => {
@@ -75,6 +81,8 @@ test('private with a live site: links the site and no repository', async ({ page
 });
 
 test('does not build draft case studies', async ({ request }) => {
+  // A published study is served, so the draft's 404 means it was left out, not that none was built.
+  expect((await request.get('/work/fixture-public')).status()).toBe(200);
   expect((await request.get('/work/fixture-draft')).status()).toBe(404);
 });
 
