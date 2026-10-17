@@ -25,21 +25,28 @@ export const test = base.extend<{ consoleGuard: void; offlineRouting: void }>({
   ],
 
   // Keeps the suite off the network, so no test depends on a third-party host such as
-  // img.shields.io. Images get a placeholder and everything else is aborted. Chromium logs an
-  // aborted request as a console error, so consoleGuard fails the test there. Firefox and WebKit
-  // are quieter.
+  // img.shields.io. Images get a placeholder. Anything else is aborted and recorded, and the test
+  // fails if any request was, naming the URLs. The console can't be left to report this: Chromium
+  // logs an aborted request, Firefox only some, and WebKit none.
   // It can't be called `offline`: that is Playwright's own option for emulating a lost connection,
   // and Playwright refuses to redefine it as an automatic fixture.
   offlineRouting: [
     async ({ page }, use) => {
+      const aborted: string[] = [];
       await page.route(
         (url) => url.hostname !== 'localhost',
-        (route) =>
-          route.request().resourceType() === 'image'
-            ? route.fulfill({ contentType: 'image/svg+xml', body: PLACEHOLDER_IMAGE })
-            : route.abort(),
+        async (route) => {
+          const request = route.request();
+          if (request.resourceType() === 'image') {
+            await route.fulfill({ contentType: 'image/svg+xml', body: PLACEHOLDER_IMAGE });
+          } else {
+            aborted.push(request.url());
+            await route.abort();
+          }
+        },
       );
       await use();
+      expect(aborted, 'unexpected external requests').toEqual([]);
     },
     { auto: true },
   ],
