@@ -41,7 +41,7 @@ Step 5 serves what step 4 built, so keep that order.
 
 ## Viewing the site
 
-- **Fixture build.** Run `npm run build:fixtures && npm run preview:fixtures`, then open <http://localhost:4321>. It uses made-up case studies that cover every source label, so the site looks complete without any real content.
+- **Fixture build.** Run `npm run build:fixtures`, then `npm run preview:fixtures`, and open <http://localhost:4321>. It uses made-up case studies that cover every source label, so the site looks complete without any real content.
 - **Real content, drafts included.** Run `npm run dev`, which uses real mode. A case study marked `draft: true` in its front matter shows under `npm run dev` and nowhere else, because `npm run build` and `npm run build:fixtures` both leave drafts out.
 
 `astro dev` keeps its content store in `.astro/`, which every mode shares, so switching `SITE_MODE` between dev sessions can print a harmless duplicate-slug warning.
@@ -51,6 +51,6 @@ Step 5 serves what step 4 built, so keep that order.
 The Playwright suite tests the fixture build, never the real site or the dev server. It runs in five projects: Chromium, Firefox and WebKit on the desktop, plus Pixel 7 and iPhone 14 emulation.
 
 1. Build the fixtures with `npm run build:fixtures`. The suite serves whatever is in `dist-fixtures/`, so run this first, and again after any change to the site.
-2. Run the suite with `npm run test:e2e`. Playwright starts and stops its own preview server on port 4321. It never reuses a running one, so stop `npm run dev` first, or the run fails straight away.
+2. Run the suite with `npm run test:e2e`. Playwright starts and stops its own preview server on port 4321. It never reuses a running one, so stop `npm run dev` or `npm run preview:fixtures` first, or the run fails straight away.
 
 The HTML report goes to `reports/playwright` and the JUnit report to `reports/junit/e2e.xml`.
