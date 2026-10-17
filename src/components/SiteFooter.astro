@@ -15,10 +15,12 @@ const contactLinks = [
   { label: 'Email', href: `mailto:${email}` },
   { label: 'Reel Raffle', href: links.reelRaffle },
 ];
+
+// role="list" keeps the list a list in Safari, which drops the role from a list with no bullets.
 ---
 
 <footer class="site-footer frame">
-  <ul class="contact">
+  <ul class="contact" role="list">
     {contactLinks.map(({ label, href }) => (
       <li>
         <a href={href}>{label}</a>

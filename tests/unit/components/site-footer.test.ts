@@ -35,6 +35,19 @@ describe('SiteFooter', () => {
     ]);
   });
 
+  it('keeps the contact links in a list that Safari still treats as one', async () => {
+    const doc = await renderHtml(SiteFooter, props);
+    const list = doc.querySelector('footer ul');
+    // Safari drops the list role from a list with no bullets, so the role is set explicitly.
+    expect(list?.getAttribute('role')).toBe('list');
+    expect([...(list?.querySelectorAll('li > a') ?? [])].map((link) => link.textContent)).toEqual([
+      'GitHub',
+      'LinkedIn',
+      'Email',
+      'Reel Raffle',
+    ]);
+  });
+
   it('labels each contact link and points it at the address it was given', async () => {
     const doc = await renderHtml(SiteFooter, props);
     const labels = ['GitHub', 'LinkedIn', 'Email', 'Reel Raffle'];
