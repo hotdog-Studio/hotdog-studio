@@ -1,0 +1,38 @@
+---
+interface Props {
+  stack: readonly string[];
+}
+
+const { stack } = Astro.props;
+
+// role="list" keeps the list a list in Safari, which drops the role from a list with no bullets.
+---
+
+<ul class="stack-tags" role="list" aria-label="Stack">
+  {stack.map((item) => (
+    <li>{item}</li>
+  ))}
+</ul>
+
+<style>
+  .stack-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  /* Each tool is its own chip, so a name with a space in it, such as "Spring Boot", reads as one. */
+  li {
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+  }
+</style>

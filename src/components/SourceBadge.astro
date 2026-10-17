@@ -1,0 +1,27 @@
+---
+import type { Source } from '../lib/content-schemas';
+import { sourceLabel } from '../lib/work';
+
+interface Props {
+  source: Source;
+}
+
+const { source } = Astro.props;
+---
+
+<span class="source-badge">{sourceLabel(source)}</span>
+
+<style>
+  /* Badges are one of the accent's three jobs (spec §7), with links and focus rings. */
+  .source-badge {
+    display: inline-block;
+    padding: 0.0625rem 0.625rem;
+    border: 1px solid var(--color-accent);
+    border-radius: 999px;
+    color: var(--color-accent);
+    font-size: var(--step--1);
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+</style>

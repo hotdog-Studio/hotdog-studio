@@ -1,0 +1,54 @@
+---
+interface Props {
+  url: string;
+  /** Only when the case study is published, so the link never points at a draft or a 404. */
+  caseStudyHref?: string | undefined;
+}
+
+const { url, caseStudyHref } = Astro.props;
+---
+
+<section aria-labelledby="built-and-shipped-heading">
+  <h2 id="built-and-shipped-heading">Built and shipped</h2>
+  <div class="card">
+    <h3>Reel Raffle</h3>
+    <p class="one-liner">A group movie-night picker that uses the TMDB API.</p>
+    <div class="links">
+      <a href={url}>Visit reelraffle.org</a>
+      {caseStudyHref && <a href={caseStudyHref}>Read the case study</a>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .card {
+    max-inline-size: var(--measure);
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+  }
+
+  h3 {
+    margin-block-end: 0.25em;
+    font-size: var(--step-1);
+  }
+
+  .one-liner {
+    margin-block-end: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  /* The padding lifts each link to a 24px target (WCAG 2.5.8). */
+  .links a {
+    display: inline-block;
+    padding-block: 0.125rem;
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,97 @@
+---
+import type { Source } from '../lib/content-schemas';
+import SourceBadge from './SourceBadge.astro';
+import StackTags from './StackTags.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  summary: string;
+  stack: readonly string[];
+  source: Source;
+  /** 3 under a section heading, as on the home page; 2 where the cards are the page's sections. */
+  headingLevel?: 2 | 3;
+}
+
+const { href, title, summary, stack, source, headingLevel = 3 } = Astro.props;
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
+---
+
+<article class="card">
+  <Heading class="title">
+    <a href={href}>{title}</a>
+  </Heading>
+  <p class="summary">{summary}</p>
+  <div class="facts">
+    <StackTags stack={stack} />
+    <SourceBadge source={source} />
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    transition: border-color 150ms ease-out;
+  }
+
+  .card:hover {
+    border-color: var(--color-text-muted);
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .title a {
+    color: var(--color-text);
+    text-decoration-line: none;
+  }
+
+  /* The link's box covers the card, so the whole card is the target, not just the title. */
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+  }
+
+  .card:hover .title a,
+  .title a:focus-visible {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
+  /* The focus ring goes round the whole card, which is what the link now covers. */
+  .title a:focus-visible {
+    outline: none;
+  }
+
+  .title a:focus-visible::after {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .summary {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  /* Pushed to the bottom, so the facts line up across a row of cards. */
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-block-start: auto;
+    padding-block-start: 0.5rem;
+  }
+</style>

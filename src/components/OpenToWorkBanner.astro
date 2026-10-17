@@ -1,0 +1,41 @@
+---
+import type { SiteConfig } from '../lib/site-config-schema';
+
+interface Props {
+  openToWork: SiteConfig['openToWork'];
+}
+
+const { openToWork } = Astro.props;
+---
+
+{openToWork.enabled && (
+  <section aria-label="Open to work">
+    <p>{openToWork.message}</p>
+  </section>
+)}
+
+<style>
+  p {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.625em;
+    margin: 0;
+    padding: 0.375em 1em;
+    border: 1px solid var(--color-border);
+    /* A pill on one line, a softly rounded box when a long message wraps. */
+    border-radius: 1.25em;
+    background: var(--color-surface);
+    font-size: var(--step--1);
+    line-height: 1.4;
+  }
+
+  /* A mustard status light. It is decoration, so it has no text for a screen reader to read. */
+  p::before {
+    content: '';
+    flex: none;
+    inline-size: 0.5em;
+    block-size: 0.5em;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+</style>
