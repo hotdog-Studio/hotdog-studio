@@ -18,9 +18,11 @@ export const siteConfigSchema = z.object({
     linkedin: z.httpUrl({ error: WEB_URL_ERROR }),
     reelRaffle: z.httpUrl({ error: WEB_URL_ERROR }),
   }),
-  cv: z
-    .string()
-    .startsWith('/', { error: 'Must start with "/", such as /cv/thomas-southcott.pdf' }),
+  // A second "/" or a backslash after the first makes a browser read the value as another host
+  // ("//host", "/\host"), so a path on this site starts with a single "/".
+  cv: z.string().regex(/^\/(?![/\\])/, {
+    error: 'Must start with a single "/", such as /cv/thomas-southcott.pdf',
+  }),
   openToWork: z
     .object({ enabled: z.boolean(), message: z.string() })
     .superRefine((openToWork, ctx) => {

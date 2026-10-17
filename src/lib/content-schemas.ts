@@ -10,8 +10,11 @@ export type Source = (typeof SOURCES)[number];
  */
 const WEB_URL_ERROR = 'Must be a web link starting with http:// or https://';
 
+/** Text a person has to write. An empty string satisfies `z.string()` but says nothing. */
+const nonEmpty = () => z.string().min(1, { error: 'Must not be empty' });
+
 /** The hosts a badge image may come from. */
-const BADGE_HOSTS: readonly string[] = ['img.shields.io', 'github.com'];
+const BADGE_HOSTS: ReadonlySet<string> = new Set(['img.shields.io', 'github.com']);
 
 /**
  * True for an https URL on a badge host. The host is compared whole, so lookalikes such as
@@ -23,11 +26,11 @@ const BADGE_HOSTS: readonly string[] = ['img.shields.io', 'github.com'];
 function isBadgeImageUrl(value: string): boolean {
   if (!URL.canParse(value)) return false;
   const { protocol, hostname } = new URL(value);
-  return protocol === 'https:' && BADGE_HOSTS.includes(hostname);
+  return protocol === 'https:' && BADGE_HOSTS.has(hostname);
 }
 
 export const badgeSchema = z.object({
-  label: z.string(),
+  label: nonEmpty(),
   src: z.httpUrl({ error: WEB_URL_ERROR }).refine(isBadgeImageUrl, {
     error: 'Badge images must be https links on img.shields.io or github.com',
     // Skip the host check once the URL check has failed, so a malformed `src` is reported once.
@@ -46,15 +49,15 @@ export type Badge = z.output<typeof badgeSchema>;
 export function caseStudySchema<C extends z.ZodType>(cover: C) {
   return z
     .object({
-      title: z.string(),
-      summary: z.string().max(160),
+      title: nonEmpty(),
+      summary: nonEmpty().max(160),
       source: z.enum(SOURCES),
       repo: z.httpUrl({ error: WEB_URL_ERROR }).optional(),
-      privateNote: z.string().optional(),
+      privateNote: nonEmpty().optional(),
       liveUrl: z.httpUrl({ error: WEB_URL_ERROR }).optional(),
-      stack: z.array(z.string()).min(1),
-      role: z.string().optional(),
-      period: z.string().optional(),
+      stack: z.array(nonEmpty()).min(1),
+      role: nonEmpty().optional(),
+      period: nonEmpty().optional(),
       featured: z.boolean().default(false),
       featuredOrder: z.int().optional(),
       order: z.int().optional(),
@@ -90,8 +93,8 @@ export function caseStudySchema<C extends z.ZodType>(cover: C) {
 }
 
 export const otherProjectSchema = z.object({
-  name: z.string(),
-  description: z.string(),
+  name: nonEmpty(),
+  description: nonEmpty(),
   repo: z.httpUrl({ error: WEB_URL_ERROR }),
 });
 export type OtherProject = z.output<typeof otherProjectSchema>;

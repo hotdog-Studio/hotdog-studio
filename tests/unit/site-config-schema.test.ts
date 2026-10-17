@@ -45,6 +45,9 @@ describe('defineSiteConfig', () => {
   it('rejects a cv path that is not root-relative', () => {
     expect(() => defineSiteConfig({ ...valid, cv: 'cv.pdf' })).toThrow(/cv/);
   });
+  it('rejects a protocol-relative cv path', () => {
+    expect(() => defineSiteConfig({ ...valid, cv: '//evil.example/cv.pdf' })).toThrow(/cv/);
+  });
   it('opens its error with a heading', () => {
     expect(() => defineSiteConfig({ ...valid, email: 'nope' })).toThrow(/^Invalid site config:\n/);
   });
@@ -60,8 +63,15 @@ describe('siteConfigSchema: issue paths', () => {
   it.each([
     ['email', 'nope'],
     ['cv', 'cv.pdf'],
+    ['cv', 'cv/thomas-southcott-cv.pdf'],
+    ['cv', '//evil.example/cv.pdf'],
+    // A browser reads a backslash after the first slash as a slash, so this is "//" in effect.
+    ['cv', '/\\evil.example/cv.pdf'],
   ])('rejects %s of %j', (field, value) => {
     expect(issuePaths({ ...valid, [field]: value })).toEqual([field]);
+  });
+  it.each(['/cv/thomas-southcott-cv.pdf', '/cv.pdf'])('accepts the cv path %s', (cv) => {
+    expect(issuePaths({ ...valid, cv })).toEqual([]);
   });
   it.each(['github', 'linkedin', 'reelRaffle'])('rejects a non-web links.%s', (link) => {
     expect(

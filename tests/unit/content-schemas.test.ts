@@ -51,6 +51,11 @@ describe('caseStudySchema: source, repo and privateNote', () => {
       expect(issuePaths({ source, repo, privateNote })).toEqual([field]);
     },
   );
+  it('names the privateNote field when a sanitized study has an empty one', () => {
+    expect(issuePaths({ source: 'sanitized', repo: REPO, privateNote: '' })).toEqual([
+      'privateNote',
+    ]);
+  });
   it('rejects a source outside the three kinds', () => {
     expect(issuePaths({ source: 'secret' })).toEqual(['source']);
   });
@@ -89,6 +94,12 @@ describe('caseStudySchema: other fields', () => {
   });
   it.each(['featuredOrder', 'order'])('rejects a non-integer %s', (field) => {
     expect(issuePaths({ source: 'private', [field]: 1.5 })).toEqual([field]);
+  });
+  it.each(['title', 'summary', 'role', 'period'])('rejects an empty %s', (field) => {
+    expect(issuePaths({ source: 'private', [field]: '' })).toEqual([field]);
+  });
+  it('rejects an empty stack entry', () => {
+    expect(issuePaths({ source: 'private', stack: [''] })).toEqual(['stack.0']);
   });
   it('validates the cover with the schema it is given', () => {
     expect(issuePaths({ source: 'private', cover: 'cover.jpg' })).toEqual([]);
@@ -184,6 +195,10 @@ describe('caseStudySchema: badges', () => {
       'badges.1.src',
     ]);
   });
+  it('rejects an empty badge label', () => {
+    const badges = [{ label: '', src: 'https://img.shields.io/x', href: REPO }];
+    expect(issuePaths({ source: 'public', repo: REPO, badges })).toEqual(['badges.0.label']);
+  });
   it('rejects a non-web badge href', () => {
     const src = 'https://img.shields.io/x';
     expect(
@@ -209,6 +224,15 @@ describe('otherProjectSchema', () => {
       repo: 'javascript:alert(1)',
     });
     expect(result.error?.issues.map((i) => i.path.join('.'))).toEqual(['repo']);
+  });
+  it.each(['name', 'description'])('rejects an empty %s', (field) => {
+    const result = otherProjectSchema.safeParse({
+      name: 'N',
+      description: 'D',
+      repo: REPO,
+      [field]: '',
+    });
+    expect(result.error?.issues.map((i) => i.path.join('.'))).toEqual([field]);
   });
   it('drops the positional id that the file() loader adds', () => {
     const project = { name: 'N', description: 'D', repo: REPO };
