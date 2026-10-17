@@ -22,3 +22,13 @@ The source of [hotdog.studio](https://hotdog.studio), Thomas Southcott's portfol
 | `npm run lint`             | Type-checks with `astro check`, then runs ESLint and checks formatting with Prettier. |
 | `npm run format`           | Rewrites every file with Prettier.                                                    |
 | `npm run test:unit`        | Runs the Vitest unit tests and writes a JUnit report to `reports/junit/unit.xml`.     |
+
+## End-to-end tests
+
+The Playwright suite tests the fixture build, never the real site or the dev server.
+
+1. Install the browsers once with `npx playwright install chromium firefox webkit`. Linux CI agents add `--with-deps`.
+2. Build the fixtures with `npm run build:fixtures`. The suite serves whatever is in `dist-fixtures/`, so run this first, and again after any change to the site.
+3. Run the suite with `npm run test:e2e`. Playwright starts and stops its own preview server on port 4321. It never reuses a running one, so stop `npm run dev` first, or the run fails straight away.
+
+The HTML report goes to `reports/playwright` and the JUnit report to `reports/junit/e2e.xml`.

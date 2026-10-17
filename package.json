@@ -11,9 +11,10 @@
     "build": "npm run check:content && astro build",
     "build:fixtures": "cross-env SITE_MODE=fixtures npm run build",
     "preview:fixtures": "cross-env SITE_MODE=fixtures astro preview --port 4321 --ignore-lock",
-    "lint": "astro check && eslint . && prettier --check . && tsx scripts/content/check-case-studies.ts src/content/work fixtures/content/work",
+    "lint": "astro check && eslint . --max-warnings 0 && prettier --check . && tsx scripts/content/check-case-studies.ts src/content/work fixtures/content/work",
     "format": "prettier --write .",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "astro": "7.4.0"
