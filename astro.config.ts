@@ -2,7 +2,8 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import { modePaths, resolveSiteMode } from './src/lib/site-mode';
 
-const paths = modePaths[resolveSiteMode(process.env.SITE_MODE)];
+const mode = resolveSiteMode(process.env.SITE_MODE);
+const paths = modePaths[mode];
 
 export default defineConfig({
   site: 'https://hotdog.studio',
@@ -11,6 +12,8 @@ export default defineConfig({
   build: { format: 'directory', inlineStylesheets: 'never' },
   markdown: { syntaxHighlight: 'prism' },
   outDir: `./${paths.outDir}`,
+  // The content store lives in cacheDir; one per mode avoids duplicate-slug warnings and staleness.
+  cacheDir: `./node_modules/.astro-${mode}`,
   vite: {
     resolve: {
       alias: {
