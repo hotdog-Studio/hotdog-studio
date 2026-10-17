@@ -44,11 +44,13 @@ export type Badge = z.output<typeof badgeSchema>;
  * Frontmatter of a case study (spec §5.2). `cover` is the schema for the optional cover image:
  * Astro's `image()` in the content collection, a plain string in tests.
  *
+ * Strict, so a misspelt key fails the build and names the key. Zod would otherwise drop it:
+ * `Draft: true` would publish the study, and `liveURL` would lose the link without a word.
  * The cross-field rules are issues on the field that needs fixing, so a build error names it.
  */
 export function caseStudySchema<C extends z.ZodType>(cover: C) {
   return z
-    .object({
+    .strictObject({
       title: nonEmpty(),
       summary: nonEmpty().max(160),
       source: z.enum(SOURCES),
@@ -92,6 +94,10 @@ export function caseStudySchema<C extends z.ZodType>(cover: C) {
     });
 }
 
+/**
+ * Not strict: each entry arrives with the positional `id` that `withPositionalIds` adds for the
+ * `file()` loader, and this schema drops it.
+ */
 export const otherProjectSchema = z.object({
   name: nonEmpty(),
   description: nonEmpty(),
@@ -99,7 +105,10 @@ export const otherProjectSchema = z.object({
 });
 export type OtherProject = z.output<typeof otherProjectSchema>;
 
-/** Frontmatter of the about page (spec §5.4). `headshot` is the schema for the optional image. */
+/**
+ * Frontmatter of the about page (spec §5.4). `headshot` is the schema for the optional image.
+ * Strict, like the case studies, so a misspelt `headShot` fails instead of being dropped.
+ */
 export function aboutSchema<C extends z.ZodType>(headshot: C) {
-  return z.object({ headshot: headshot.optional() });
+  return z.strictObject({ headshot: headshot.optional() });
 }

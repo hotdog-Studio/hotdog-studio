@@ -13,6 +13,14 @@ const base = { title: 'T', summary: 'S', stack: ['Playwright'] };
 const issuePaths = (input: object) =>
   schema.safeParse({ ...base, ...input }).error?.issues.map((i) => i.path.join('.')) ?? [];
 
+/** The one issue a strict schema raises for a key it does not know, named in `keys` and the message. */
+const unknownKeyIssue = (key: string) =>
+  expect.objectContaining({
+    code: 'unrecognized_keys',
+    keys: [key],
+    message: expect.stringContaining(key),
+  });
+
 describe('SOURCES', () => {
   it('lists the three source kinds', () => {
     expect(SOURCES).toEqual(['public', 'sanitized', 'private']);
@@ -124,6 +132,19 @@ describe('caseStudySchema: other fields', () => {
       draft: false,
     };
     expect(schema.parse(full)).toEqual(full);
+  });
+});
+
+describe('caseStudySchema: unknown keys', () => {
+  it('rejects a misspelt key instead of dropping it, and names the key', () => {
+    const result = schema.safeParse({ ...base, source: 'private', liveURL: 'https://x.example' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([unknownKeyIssue('liveURL')]);
+  });
+  it('rejects Draft: true, which would otherwise publish the study', () => {
+    const result = schema.safeParse({ ...base, source: 'private', Draft: true });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([unknownKeyIssue('Draft')]);
   });
 });
 
@@ -251,5 +272,10 @@ describe('aboutSchema', () => {
   it('rejects a headshot that does not', () => {
     const result = about.safeParse({ headshot: 42 });
     expect(result.error?.issues.map((i) => i.path.join('.'))).toEqual(['headshot']);
+  });
+  it('rejects a misspelt headShot key instead of dropping it, and names the key', () => {
+    const result = about.safeParse({ headShot: 'me.jpg' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([unknownKeyIssue('headShot')]);
   });
 });
