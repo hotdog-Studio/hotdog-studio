@@ -46,6 +46,9 @@ export const test = base.extend<{ consoleGuard: void; offlineRouting: void }>({
         },
       );
       await use();
+      // A handler still fulfilling or aborting when the page closes would otherwise reject as an
+      // unhandled error, so stop routing first and ignore whatever such a handler throws.
+      await page.unrouteAll({ behavior: 'ignoreErrors' });
       expect(aborted, 'unexpected external requests').toEqual([]);
     },
     { auto: true },

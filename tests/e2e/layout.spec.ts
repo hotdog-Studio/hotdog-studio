@@ -19,7 +19,10 @@ test('the home page is titled with the site name', async ({ page }) => {
 
 test('no navigation item is current on the home page', async ({ page }) => {
   await page.goto('/');
-  await expect(new SiteHeader(page).nav.locator('[aria-current]')).toHaveCount(0);
+  const header = new SiteHeader(page);
+  // A renamed or removed nav matches nothing and would pass the check below, so find it first.
+  await expect(header.nav.getByRole('link')).toHaveCount(3);
+  await expect(header.nav.locator('[aria-current]')).toHaveCount(0);
 });
 
 test('the footer shows the build stamp and links to the quality page', async ({ page }) => {

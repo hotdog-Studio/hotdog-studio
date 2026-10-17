@@ -24,7 +24,8 @@ export default defineConfig(
   tseslint.configs.strict,
   astro.configs.recommended,
   { languageOptions: { globals: globals.node } },
-  // Specs only: the shared fixtures file under tests/support is deliberately out of scope.
+  // The full preset is for specs only. Page objects get just the blocking rules below, and the
+  // shared fixtures file under tests/support is deliberately out of scope.
   { files: ['tests/e2e/**'], ...playwright.configs['flat/recommended'] },
   {
     // The recommended preset only warns on the first two and leaves the third off. Make all three
@@ -34,6 +35,19 @@ export default defineConfig(
     rules: {
       'playwright/no-wait-for-timeout': 'error',
       'playwright/no-force-option': 'error',
+      'playwright/prefer-native-locators': 'error',
+    },
+  },
+  {
+    // A page object isn't a spec, so it skips the preset's rules about how a test is structured.
+    // It still gets the four rules that keep a suite deterministic and its locators role-based,
+    // because a helper can break those as easily as a spec can.
+    files: ['tests/support/pages/**'],
+    plugins: { playwright },
+    rules: {
+      'playwright/no-wait-for-timeout': 'error',
+      'playwright/no-force-option': 'error',
+      'playwright/no-networkidle': 'error',
       'playwright/prefer-native-locators': 'error',
     },
   },
