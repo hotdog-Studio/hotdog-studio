@@ -7,10 +7,11 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "check:content": "tsx scripts/content/check-case-studies.ts",
+    "build": "npm run check:content && astro build",
     "build:fixtures": "cross-env SITE_MODE=fixtures npm run build",
     "preview:fixtures": "cross-env SITE_MODE=fixtures astro preview --port 4321 --ignore-lock",
-    "lint": "astro check && eslint . && prettier --check .",
+    "lint": "astro check && eslint . && prettier --check . && tsx scripts/content/check-case-studies.ts src/content/work fixtures/content/work",
     "format": "prettier --write .",
     "test:unit": "vitest run"
   },
