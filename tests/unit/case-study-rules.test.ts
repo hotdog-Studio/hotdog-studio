@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { YAMLParseError } from 'yaml';
 import {
   REQUIRED_H2S,
   checkDirectories,
@@ -15,9 +16,20 @@ const parsed = (file: string, front: string, body?: string) => parseStudy(file, 
 const featured = (file: string, order: number) =>
   parsed(file, `title: ${file}\nfeatured: true\nfeaturedOrder: ${order}`);
 
+/** What `fn` throws, so a test can look at more than the message. */
+const thrownBy = (fn: () => unknown): unknown => {
+  try {
+    fn();
+  } catch (error) {
+    return error;
+  }
+  throw new Error('expected the call to throw');
+};
+
 const H2_RULE = `H2 sections must be exactly Context, Problem, Test strategy, Stack, Results, What I'd change (in that order)`;
 const PROMPT_MARKER_RULE =
   'remove the scaffold prompt markers (<!-- prompt: … -->) before publishing';
+const TODO_RULE = 'replace the TODO(thomas) placeholders before publishing';
 
 describe('parseStudy', () => {
   it('reads the flags and the H2s in order', () => {
@@ -28,6 +40,7 @@ describe('parseStudy', () => {
       featuredOrder: 2,
       h2s: [...REQUIRED_H2S],
       hasPromptMarker: false,
+      hasTodoMarker: false,
     });
   });
   it('reads a draft with no featuredOrder', () => {
@@ -38,6 +51,7 @@ describe('parseStudy', () => {
       featuredOrder: undefined,
       h2s: [...REQUIRED_H2S],
       hasPromptMarker: false,
+      hasTodoMarker: false,
     });
   });
   it('counts draft and featured only when the value is exactly true', () => {
@@ -52,7 +66,8 @@ describe('parseStudy', () => {
   });
   it('reads a file with a UTF-8 BOM and CRLF endings the same as plain LF', () => {
     // No blank line after the frontmatter, so a body offset that is off by one would eat a `#`.
-    const front = '---\ntitle: A\ndraft: true\nfeatured: true\nfeaturedOrder: 1\n---\n';
+    const front =
+      "---\ntitle: A\nsummary: 'TODO(thomas): x'\ndraft: true\nfeatured: true\nfeaturedOrder: 1\n---\n";
     const lf = `${front}${SECTIONS}\n<!-- prompt: fill me in -->\n`;
     const bomCrlf = `\uFEFF${lf.replaceAll('\n', '\r\n')}`;
     expect(parseStudy('a.md', bomCrlf)).toEqual(parseStudy('a.md', lf));
@@ -64,6 +79,7 @@ describe('parseStudy', () => {
       featuredOrder: 1,
       h2s: [...REQUIRED_H2S],
       hasPromptMarker: true,
+      hasTodoMarker: true,
     });
   });
   it('accepts a curly apostrophe in "What I’d change"', () => {
@@ -101,6 +117,18 @@ describe('parseStudy', () => {
     expect(() => parseStudy('a.md', source)).toThrow(
       'a.md: frontmatter is missing or not valid YAML',
     );
+  });
+  it('keeps the YAML error, with its line and column in the file', () => {
+    // An unquoted ": " inside a value is the likeliest slip when a summary is edited by hand.
+    const source = md('title: A\nsummary: TODO(thomas): one sentence');
+    expect(() => parseStudy('a.md', source)).toThrow(
+      /^a\.md: frontmatter is missing or not valid YAML: .+ at line 3, column 10/,
+    );
+  });
+  it('passes the YAML error on as the cause', () => {
+    const error = thrownBy(() => parseStudy('a.md', md('title: A\nsummary: a: b')));
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).cause).toBeInstanceOf(YAMLParseError);
   });
 });
 
@@ -158,22 +186,40 @@ describe('checkStudies', () => {
       'a.md: remove the scaffold prompt markers (<!-- prompt: … -->) before publishing',
     ]);
   });
+  it('rejects a TODO(thomas) placeholder in the frontmatter', () => {
+    const study = parsed('a.md', "title: A\nsummary: 'TODO(thomas): one sentence.'");
+    expect(checkStudies([study])).toEqual([
+      'a.md: replace the TODO(thomas) placeholders before publishing',
+    ]);
+  });
+  it('rejects a TODO(thomas) placeholder in the body', () => {
+    const study = parsed('a.md', 'title: A', `${SECTIONS}\nTODO(thomas): add the numbers.\n`);
+    expect(checkStudies([study])).toEqual([
+      'a.md: replace the TODO(thomas) placeholders before publishing',
+    ]);
+  });
+  it('lets a draft keep its TODO(thomas) placeholders', () => {
+    const draft = parsed('a.md', "title: A\nsummary: 'TODO(thomas): one sentence.'\ndraft: true");
+    expect(draft.hasTodoMarker).toBe(true);
+    expect(checkStudies([draft])).toEqual([]);
+  });
   it('ignores drafts for every rule', () => {
     const draft = parsed(
       'z.md',
-      'title: Z\ndraft: true\nfeatured: true\nfeaturedOrder: 1',
+      "title: Z\nsummary: 'TODO(thomas): x'\ndraft: true\nfeatured: true\nfeaturedOrder: 1",
       '## Context\n<!-- prompt: x -->\n',
     );
     expect(
       checkStudies([featured('a.md', 1), featured('b.md', 2), featured('c.md', 3), draft]),
     ).toEqual([]);
   });
-  it('reports collection rules first, then each file in order, the H2s before the marker', () => {
+  it('reports collection rules first, then each file in order: H2s, prompt markers, TODOs', () => {
     const unfinished = (file: string, order: number, body: string) =>
       parsed(file, `title: ${file}\nfeatured: true\nfeaturedOrder: ${order}`, body);
     expect(
       checkStudies([
-        unfinished('a.md', 2, '## Context\n<!-- prompt: x -->\n'),
+        // The placeholder comes first in the file, so only the rule order can put it last.
+        unfinished('a.md', 2, '## Context\nTODO(thomas): x\n\n<!-- prompt: x -->\n'),
         unfinished('b.md', 2, SECTIONS + '<!-- prompt: x -->'),
         unfinished('c.md', 1, SECTIONS),
         unfinished('d.md', 1, SECTIONS),
@@ -184,6 +230,7 @@ describe('checkStudies', () => {
       'featuredOrder 2 is used by more than one published case study: a.md, b.md',
       `a.md: ${H2_RULE}; found: Context`,
       `a.md: ${PROMPT_MARKER_RULE}`,
+      `a.md: ${TODO_RULE}`,
       `b.md: ${PROMPT_MARKER_RULE}`,
     ]);
   });

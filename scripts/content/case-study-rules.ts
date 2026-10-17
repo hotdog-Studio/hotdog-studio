@@ -22,31 +22,46 @@ export type ParsedStudy = {
   featuredOrder: number | undefined;
   h2s: string[];
   hasPromptMarker: boolean;
+  /** `TODO(thomas)` appears somewhere in the file, the frontmatter included. */
+  hasTodoMarker: boolean;
 };
 
 const MAX_FEATURED = 3;
 const PROMPT_MARKER = '<!-- prompt:';
+const TODO_MARKER = 'TODO(thomas)';
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
+const INVALID_FRONTMATTER = 'frontmatter is missing or not valid YAML';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** Splits off the frontmatter. `undefined` means it is missing, invalid or not a mapping. */
+/**
+ * Splits off the frontmatter, or throws, naming the file, when it is missing, invalid or not a
+ * mapping. A YAML syntax error keeps the parser's reason, with its line and column, because this
+ * check runs before Astro's and would otherwise hide where the mistake is.
+ */
 function splitFrontmatter(
+  file: string,
   source: string,
-): { data: Record<string, unknown>; body: string } | undefined {
+): { data: Record<string, unknown>; body: string } {
   const match = FRONTMATTER.exec(source);
-  if (match === null) return undefined;
+  if (match === null) throw new Error(`${file}: ${INVALID_FRONTMATTER}`);
+  let data: unknown;
   try {
-    const data: unknown = parse(match[1] ?? '');
-    return isRecord(data) ? { data, body: source.slice(match[0].length) } : undefined;
-  } catch {
-    return undefined;
+    // The line break stands in for the opening `---`, so the parser counts lines from the top of
+    // the file, as Astro's does, not from the first line inside the fence.
+    data = parse(`\n${match[1] ?? ''}`);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message.trimEnd() : String(error);
+    throw new Error(`${file}: ${INVALID_FRONTMATTER}: ${reason}`, { cause: error });
   }
+  if (!isRecord(data)) throw new Error(`${file}: ${INVALID_FRONTMATTER}`);
+  return { data, body: source.slice(match[0].length) };
 }
 
 /**
- * Reads the flags, the H2 headings and the prompt-marker check from one case-study file.
+ * Reads the flags, the H2 headings and the two scaffold checks (prompt markers and `TODO(thomas)`
+ * placeholders) from one case-study file.
  *
  * Only the body is parsed as Markdown, so the frontmatter's closing `---` cannot turn the line
  * above it into a setext heading. A real parser also keeps `##` lines inside code fences out.
@@ -55,11 +70,7 @@ function splitFrontmatter(
  */
 export function parseStudy(file: string, source: string): ParsedStudy {
   // Windows editors can save a UTF-8 BOM. Node keeps it as U+FEFF, which hides the opening `---`.
-  const frontmatter = splitFrontmatter(source.replace(/^\uFEFF/, ''));
-  if (frontmatter === undefined) {
-    throw new Error(`${file}: frontmatter is missing or not valid YAML`);
-  }
-  const { data, body } = frontmatter;
+  const { data, body } = splitFrontmatter(file, source.replace(/^\uFEFF/, ''));
   const featuredOrder = data['featuredOrder'];
   const h2s = fromMarkdown(body).children.flatMap((node) =>
     // Smart-quote editors write the apostrophe in "What I’d change" as a right single quote.
@@ -72,6 +83,8 @@ export function parseStudy(file: string, source: string): ParsedStudy {
     featuredOrder: typeof featuredOrder === 'number' ? featuredOrder : undefined,
     h2s,
     hasPromptMarker: body.includes(PROMPT_MARKER),
+    // The summary is in the frontmatter, so the whole file is searched, not just the body.
+    hasTodoMarker: source.includes(TODO_MARKER),
   };
 }
 
@@ -79,7 +92,8 @@ const fileList = (studies: readonly ParsedStudy[]) => studies.map((s) => s.file)
 
 /**
  * The rules that span one collection of case studies (spec §5.2). Drafts are ignored.
- * Collection-level messages come first, then each file's, with its H2 message before its marker one.
+ * Collection-level messages come first, then each file's: its H2 message, then its prompt-marker
+ * one, then its `TODO(thomas)` one.
  */
 export function checkStudies(studies: readonly ParsedStudy[]): string[] {
   const published = studies.filter((study) => !study.draft);
@@ -106,7 +120,7 @@ export function checkStudies(studies: readonly ParsedStudy[]): string[] {
     }
   }
 
-  for (const { file, h2s, hasPromptMarker } of published) {
+  for (const { file, h2s, hasPromptMarker, hasTodoMarker } of published) {
     if (h2s.length !== REQUIRED_H2S.length || h2s.some((h2, i) => h2 !== REQUIRED_H2S[i])) {
       const found = h2s.length > 0 ? h2s.join(', ') : 'none';
       errors.push(
@@ -118,6 +132,9 @@ export function checkStudies(studies: readonly ParsedStudy[]): string[] {
         `${file}: remove the scaffold prompt markers (<!-- prompt: … -->) before publishing`,
       );
     }
+    if (hasTodoMarker) {
+      errors.push(`${file}: replace the ${TODO_MARKER} placeholders before publishing`);
+    }
   }
   return errors;
 }
@@ -128,8 +145,9 @@ const isNotFound = (error: unknown) =>
 /**
  * Checks each directory of case studies as its own collection, and counts the files it scanned.
  * `src/content/work` and `fixtures/content/work` are separate collections, so pooling them would
- * add the real featured studies to the fixtures'. File names are sorted, so the messages and the
- * counts come out the same on every OS. Files that fail to parse are reported before the rules.
+ * add the real featured studies to the fixtures'. File names are sorted, so the messages come out
+ * in the same order, with the same counts, on every OS. The paths in them use the OS's own
+ * separator. Files that fail to parse are reported before the rules.
  */
 export async function checkDirectories(
   dirs: readonly string[],
