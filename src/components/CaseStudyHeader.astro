@@ -63,7 +63,11 @@ const { title, summary, role, period, stack, source, repo, liveUrl } = Astro.pro
     margin-block-start: 1.25rem;
   }
 
-  h1 + .summary {
+  /*
+   * Scoped to `.study-header >` like the gap rule above, so it outranks that rule and the
+   * summary sits close under the title.
+   */
+  .study-header > h1 + .summary {
     margin-block-start: 0.5rem;
   }
 
