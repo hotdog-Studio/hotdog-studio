@@ -262,11 +262,9 @@ describe('checkDirectories', () => {
     });
     expect(await checkDirectories([dir])).toEqual({ scanned: 2, published: 1, errors: [] });
   });
-  it('reports a missing directory', async () => {
+  it('reports a missing directory as not found', async () => {
     const missing = path.join(tmp, 'missing');
-    const { errors } = await checkDirectories([missing]);
-    expect(errors).toContain(`${missing}: directory not found`);
-    expect(errors).toContain(`No case-study files found in: ${missing}`);
+    expect((await checkDirectories([missing])).errors).toEqual([`${missing}: directory not found`]);
   });
   it('fails instead of passing when no files were scanned', async () => {
     const empty = await makeDir('empty');
@@ -274,10 +272,20 @@ describe('checkDirectories', () => {
     expect(scanned).toBe(0);
     expect(errors).toContain(`No case-study files found in: ${empty}`);
   });
-  it('names every directory when no files were scanned', async () => {
+  it('reports an empty directory even when another one has files', async () => {
+    const full = await makeDir('full', { 'a.md': md('title: A') });
+    const empty = await makeDir('empty', { 'notes.txt': 'x' });
+    expect(await checkDirectories([full, empty])).toEqual({
+      scanned: 1,
+      published: 1,
+      errors: [`No case-study files found in: ${empty}`],
+    });
+  });
+  it('reports each empty directory on its own', async () => {
     const [a, b] = [await makeDir('a'), await makeDir('b')];
     expect((await checkDirectories([a, b])).errors).toEqual([
-      `No case-study files found in: ${a}, ${b}`,
+      `No case-study files found in: ${a}`,
+      `No case-study files found in: ${b}`,
     ]);
   });
   it('checks each directory as its own collection', async () => {

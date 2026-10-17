@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { toString } from 'mdast-util-to-string';
 import { parse } from 'yaml';
+import { MAX_FEATURED } from '../../src/lib/work';
 
 /** The H2 sections every published case study has, in this order (spec §4.4). */
 export const REQUIRED_H2S = [
@@ -26,7 +27,6 @@ export type ParsedStudy = {
   hasTodoMarker: boolean;
 };
 
-const MAX_FEATURED = 3;
 const PROMPT_MARKER = '<!-- prompt:';
 const TODO_MARKER = 'TODO(thomas)';
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -148,6 +148,9 @@ const isNotFound = (error: unknown) =>
  * add the real featured studies to the fixtures'. File names are sorted, so the messages come out
  * in the same order, with the same counts, on every OS. The paths in them use the OS's own
  * separator. Files that fail to parse are reported before the rules.
+ *
+ * Each directory is its own scanning gate (spec §8.1.2): one with no `.md` files fails even when
+ * another has some, and one that does not exist is reported as not found.
  */
 export async function checkDirectories(
   dirs: readonly string[],
@@ -165,6 +168,10 @@ export async function checkDirectories(
       errors.push(`${dir}: directory not found`);
       continue;
     }
+    if (names.length === 0) {
+      errors.push(`No case-study files found in: ${dir}`);
+      continue;
+    }
 
     const studies: ParsedStudy[] = [];
     for (const name of names) {
@@ -180,7 +187,5 @@ export async function checkDirectories(
     published += studies.filter((study) => !study.draft).length;
     errors.push(...checkStudies(studies));
   }
-
-  if (scanned === 0) errors.push(`No case-study files found in: ${dirs.join(', ')}`);
   return { scanned, published, errors };
 }

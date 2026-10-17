@@ -19,8 +19,11 @@ export function isVisible(draft: boolean, isDev: boolean): boolean {
   return !draft || isDev;
 }
 
-/** The home page features at most this many studies (spec §4.2). */
-const MAX_FEATURED = 3;
+/**
+ * The home page features at most this many studies (spec §4.2). The content check reads it too,
+ * so a build fails on more featured studies than the page would show.
+ */
+export const MAX_FEATURED = 3;
 
 /** Ascending, with a missing number after every present one. */
 function compareMissingLast(a: number | undefined, b: number | undefined): number {
