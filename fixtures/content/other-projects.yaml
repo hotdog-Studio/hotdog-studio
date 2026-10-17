@@ -1,0 +1,6 @@
+- name: Fixture project one
+  description: First fixture project.
+  repo: https://github.com/example/fixture-one
+- name: Fixture project two
+  description: Second fixture project.
+  repo: https://github.com/example/fixture-two

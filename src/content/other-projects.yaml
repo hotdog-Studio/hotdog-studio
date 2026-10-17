@@ -1,0 +1,9 @@
+- name: AutoStreamDeck
+  description: The starting point to build your perfect macro keyboard.
+  repo: https://github.com/thomassouthcott/AutoStreamDeck
+- name: Keybrook
+  description: The hitbox for keyboard warriors.
+  repo: https://github.com/thomassouthcott/Keybrook
+- name: Elden-Ring-Fullscreen-Map
+  description: 'TODO(thomas): one-liner'
+  repo: https://github.com/thomassouthcott/Elden-Ring-Fullscreen-Map
