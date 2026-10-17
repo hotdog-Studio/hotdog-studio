@@ -47,4 +47,10 @@ describe('ReelRaffleCard', () => {
     const doc = await renderHtml(ReelRaffleCard, { url });
     expect(linkWithText(doc, 'Read the case study')).toBeUndefined();
   });
+
+  // The flex gap spaces the links on screen. The space keeps them apart when CSS is off.
+  it('keeps its links apart in plain text', async () => {
+    const doc = await renderHtml(ReelRaffleCard, { url, caseStudyHref: '/work/reel-raffle' });
+    expect(doc.body.textContent).toContain('Visit reelraffle.org Read the case study');
+  });
 });

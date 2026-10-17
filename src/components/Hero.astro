@@ -15,12 +15,12 @@ const { site } = Astro.props;
   <div class="actions">
     <a class="button primary" href="/work">
       See my work
-    </a>
+    </a>{' '}
     {site.openToWork.enabled && (
       <a class="button" href={site.cv} download>
         Download CV
       </a>
-    )}
+    )}{' '}
     <a class="button" href={`mailto:${site.email}`}>
       Email me
     </a>

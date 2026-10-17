@@ -55,4 +55,13 @@ describe('Hero', () => {
     expect(linkWithText(doc, 'See my work')?.getAttribute('href')).toBe('/work');
     expect(linkWithText(doc, 'Email me')?.getAttribute('href')).toBe('mailto:hello@example.com');
   });
+
+  // The flex gap spaces the links on screen. These spaces keep them apart when CSS is off.
+  it.each([
+    ['open to work', openToWork, 'See my work Download CV Email me'],
+    ['not open to work', notOpenToWork, 'See my work Email me'],
+  ])('keeps its links apart in plain text while %s', async (_state, site, links) => {
+    const doc = await renderHtml(Hero, { site });
+    expect(doc.body.textContent.replace(/\s+/g, ' ')).toContain(links);
+  });
 });
