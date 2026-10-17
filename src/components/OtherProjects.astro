@@ -1,0 +1,63 @@
+---
+import type { OtherProject } from '../lib/content-schemas';
+
+interface Props {
+  projects: readonly OtherProject[];
+}
+
+const { projects } = Astro.props;
+
+// role="list" keeps the list a list in Safari, which drops the role from a list with no bullets.
+---
+
+{projects.length > 0 && (
+  <section aria-labelledby="other-projects-heading">
+    <h2 id="other-projects-heading">Other things I build</h2>
+    <ul class="projects" role="list">
+      {projects.map(({ name, description, repo }) => (
+        <li>
+          <a href={repo}>{name}</a>
+          <p>{description}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  /*
+   * Columns as wide as the case-study cards above them, so the two line up. The tracks are
+   * auto-fill, so a short strip keeps that width instead of stretching across the frame.
+   */
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1.5rem clamp(1rem, 0.75rem + 1vw, 1.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A hairline rather than a box, so the strip stays quieter than the case-study cards. */
+  li {
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  /*
+   * The padding lifts the link to a 24px target (WCAG 2.5.8). An inline-block is as wide as its
+   * longest word, so `anywhere` lets a long repo name break rather than spill out of its column.
+   */
+  a {
+    display: inline-block;
+    padding-block: 0.125rem;
+    font-size: var(--step-1);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>

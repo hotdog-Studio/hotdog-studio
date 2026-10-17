@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import OtherProjects from '../../components/OtherProjects.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getVisibleCaseStudies } from '../../lib/case-studies';
+import { caseStudyHref, sortForIndex } from '../../lib/work';
+
+const studies = sortForIndex(await getVisibleCaseStudies());
+// getCollection promises no order. The loader's positional ids ('000', '001', ...) follow the file.
+const projects = (await getCollection('otherProjects'))
+  .toSorted((a, b) => a.id.localeCompare(b.id))
+  .map(({ data }) => data);
+---
+
+<BaseLayout title="Work" description="Case studies in test automation and quality engineering.">
+  <div class="sections">
+    <div class="studies">
+      <h1>Work</h1>
+      {studies.length > 0 && (
+        <div class="cards">
+          {studies.map(({ id, data }) => (
+            <CaseStudyCard
+              href={caseStudyHref(id)}
+              title={data.title}
+              summary={data.summary}
+              stack={data.stack}
+              source={data.source}
+              headingLevel={2}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+    <OtherProjects projects={projects} />
+  </div>
+</BaseLayout>
+
+<style>
+  /* A gap rather than margins, so a section that is left out leaves no hole behind. */
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
+  }
+
+  .studies {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+  }
+
+  /* The gap in .studies already spaces the heading from the cards, so it needs no bottom margin. */
+  h1 {
+    margin-block-end: 0;
+  }
+
+  /* One column at 320px, and never more columns than there are cards. */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+  }
+</style>
