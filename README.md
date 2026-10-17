@@ -46,6 +46,22 @@ Step 5 serves what step 4 built, so keep that order.
 
 `astro dev` keeps its content store in `.astro/`, which every mode shares, so switching `SITE_MODE` between dev sessions can print a harmless duplicate-slug warning.
 
+## Writing content
+
+The site's words live in two places:
+
+- `src/content/` holds the case studies (`src/content/work/`, one Markdown file each, named by its URL slug), the bio (`src/content/about.md`) and the "Other things I build" list (`src/content/other-projects.yaml`).
+- `src/site.config.ts` holds your name, job title, tagline, pitch, email, links, CV path and the open-to-work banner.
+
+When you write a case study:
+
+- Keep `draft: true` in its front matter until it is finished. A draft shows under `npm run dev` and nowhere else, so you can preview it without publishing it.
+- Before a study leaves draft, remove every `<!-- prompt: … -->` comment and every `TODO(thomas)` placeholder. The content check fails the build while a published study still has either.
+- Front matter keys are strict. A misspelt key, such as `liveURL` for `liveUrl` or `Draft` for `draft`, fails the build instead of being ignored.
+- Quote any YAML value that contains `: `, as the scaffolded summaries are, for example `summary: 'Flaky tests: how I fixed them'`. Inside single quotes, write an apostrophe as `''`. An unquoted `: ` fails the build, which names the line and column.
+
+After editing, run `npm run format`. `npm run lint` checks the formatting too, Markdown included, and fails on any file that Prettier would change.
+
 ## End-to-end tests
 
 The Playwright suite tests the fixture build, never the real site or the dev server. It runs in five projects: Chromium, Firefox and WebKit on the desktop, plus Pixel 7 and iPhone 14 emulation.
