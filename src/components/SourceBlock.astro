@@ -1,0 +1,87 @@
+---
+import type { Badge, Source } from '../lib/content-schemas';
+
+interface Props {
+  source: Source;
+  repo?: string | undefined;
+  privateNote?: string | undefined;
+  badges?: readonly Badge[] | undefined;
+}
+
+const { source, repo, privateNote, badges = [] } = Astro.props;
+const isPrivate = source === 'private';
+const isSanitized = source === 'sanitized';
+---
+
+<section class="source" aria-label="Source">
+  {isPrivate && <p class="callout">Source is private. Happy to walk through it in interview.</p>}
+  {isSanitized && (
+    <p class="callout">
+      <strong>Public edition of a private framework</strong>
+    </p>
+  )}
+  {isSanitized && privateNote && <p class="note">{privateNote}</p>}
+  {!isPrivate && (
+    <div class="links">
+      {repo && <a href={repo}>View the repository</a>}
+      {badges.map(({ label, src, href }) => (
+        <>
+          {' '}
+          <a class="badge" href={href}>
+            <img src={src} alt={label} height="20" />
+          </a>
+        </>
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+  /* A panel like the Reel Raffle card, so the answer to "can I see the code?" is easy to find. */
+  .source {
+    max-inline-size: var(--measure);
+    padding: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .note {
+    margin-block-start: 0.25rem;
+    color: var(--color-text-muted);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .links:not(:first-child) {
+    margin-block-start: 1rem;
+  }
+
+  a {
+    font-weight: 600;
+  }
+
+  /* The padding lifts each 20px badge to a 24px target (WCAG 2.5.8). */
+  .badge {
+    padding-block: 0.125rem;
+  }
+
+  /*
+   * 20px tall before the image arrives, so the page below doesn't jump when it does. The global
+   * img rule's `block-size: auto` would otherwise override the height attribute.
+   */
+  img {
+    display: block;
+    block-size: 20px;
+    inline-size: auto;
+  }
+</style>

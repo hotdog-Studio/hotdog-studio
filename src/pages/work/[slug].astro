@@ -1,0 +1,55 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import CaseStudyHeader from '../../components/CaseStudyHeader.astro';
+import SourceBlock from '../../components/SourceBlock.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getVisibleCaseStudies } from '../../lib/case-studies';
+import '../../styles/prism.css';
+
+/** One page per study this build shows, so a draft gets no page outside `astro dev`. */
+export async function getStaticPaths() {
+  const studies = await getVisibleCaseStudies();
+  return studies.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <div class="study">
+    <CaseStudyHeader
+      title={data.title}
+      summary={data.summary}
+      role={data.role}
+      period={data.period}
+      stack={data.stack}
+      source={data.source}
+      repo={data.repo}
+      liveUrl={data.liveUrl}
+    />
+    <SourceBlock
+      source={data.source}
+      repo={data.repo}
+      privateNote={data.privateNote}
+      badges={data.badges}
+    />
+    <article class="prose">
+      <Content />
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  /* A gap rather than margins, as on the other pages, so the three parts are evenly spaced. */
+  .study {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+import type { Source } from '../lib/content-schemas';
+import SourceBadge from './SourceBadge.astro';
+import StackTags from './StackTags.astro';
+
+interface Props {
+  title: string;
+  summary: string;
+  role?: string | undefined;
+  period?: string | undefined;
+  stack: readonly string[];
+  source: Source;
+  repo?: string | undefined;
+  liveUrl?: string | undefined;
+}
+
+const { title, summary, role, period, stack, source, repo, liveUrl } = Astro.props;
+---
+
+<header class="study-header">
+  <h1>{title}</h1>
+  <p class="summary">{summary}</p>
+  {(role || period) && (
+    <dl class="meta">
+      {role && (
+        <div>
+          <dt>Role</dt>
+          <dd>{role}</dd>
+        </div>
+      )}
+      {period && (
+        <div>
+          <dt>Period</dt>
+          <dd>{period}</dd>
+        </div>
+      )}
+    </dl>
+  )}
+  <div class="facts">
+    <StackTags stack={stack} />
+    <SourceBadge source={source} />
+  </div>
+  {(repo || liveUrl) && (
+    <div class="links">
+      {repo && <a href={repo}>Repository</a>}
+      {repo && liveUrl && ' '}
+      {liveUrl && <a href={liveUrl}>Live site</a>}
+    </div>
+  )}
+</header>
+
+<style>
+  /* One reading column, on the same left axis and at the same width as the body below. */
+  .study-header {
+    max-inline-size: var(--measure);
+  }
+
+  .study-header > * {
+    margin-block: 0;
+  }
+
+  .study-header > * + * {
+    margin-block-start: 1.25rem;
+  }
+
+  h1 + .summary {
+    margin-block-start: 0.5rem;
+  }
+
+  .summary {
+    color: var(--color-text-muted);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  /* Each term sits above its value, and the pairs run side by side. */
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2.5rem;
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .links a {
+    font-weight: 600;
+  }
+</style>

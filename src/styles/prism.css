@@ -1,0 +1,58 @@
+/*
+ * Code samples in case studies. Prism highlights them at build time and marks each token with
+ * classes only, never inline styles, so the CSP holds (spec §10.2). The colours are the --code-*
+ * tokens in tokens.css.
+ */
+
+/*
+ * Long lines wrap rather than scroll, so a code sample never scrolls sideways, even at 320px
+ * (spec §7). With nothing to scroll, the block needs no tabindex to be keyboard-reachable.
+ */
+pre {
+  padding: 1rem clamp(0.875rem, 0.75rem + 0.5vw, 1.25rem);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+.token.comment {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.token.keyword {
+  color: var(--code-keyword);
+}
+
+.token.string {
+  color: var(--code-string);
+}
+
+.token.number {
+  color: var(--code-number);
+}
+
+.token.builtin {
+  color: var(--code-builtin);
+}
+
+.token.function {
+  color: var(--code-function);
+}
+
+.token.class-name {
+  color: var(--code-class-name);
+}
+
+.token.operator {
+  color: var(--code-operator);
+}
+
+.token.punctuation {
+  color: var(--code-punctuation);
+}
