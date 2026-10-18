@@ -33,6 +33,15 @@ test('opens on click with the photo, its counter and caption', async ({ page }) 
   await expect(lightbox.caption).toHaveText('Fixture caption one.');
 });
 
+test('sets no inline styles while it is open', async ({ page }) => {
+  const album = new AlbumPage(page);
+  const lightbox = new Lightbox(page);
+  await album.goto('album-newer');
+  await album.thumbnails.first().click();
+  await expect(lightbox.dialog).toBeVisible();
+  await expect(page.locator('[style]')).toHaveCount(0);
+});
+
 test('opens from the keyboard with Enter', async ({ page }) => {
   const album = new AlbumPage(page);
   const lightbox = new Lightbox(page);
