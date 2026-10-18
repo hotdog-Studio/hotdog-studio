@@ -1,0 +1,6 @@
+title: Fixture draft album
+date: 2026-01-01
+draft: true
+photos:
+  draft-1.jpg:
+    alt: 'Fixture: draft photo'

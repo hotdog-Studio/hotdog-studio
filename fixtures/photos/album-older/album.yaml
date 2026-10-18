@@ -1,0 +1,9 @@
+title: Fixture older album
+date: 2024-09-01
+showExif: false
+cover: older-2.jpg
+photos:
+  older-1.jpg:
+    alt: 'Fixture: older photo one'
+  older-2.jpg:
+    alt: 'Fixture: older photo two'

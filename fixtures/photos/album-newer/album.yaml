@@ -1,0 +1,9 @@
+title: Fixture newer album
+date: 2025-06-14
+description: Fixture album with three photos, one stored sideways and one without alt text.
+photos:
+  newer-1.jpg:
+    alt: 'Fixture: a mustard gradient'
+    caption: Fixture caption one.
+  newer-2.jpg:
+    alt: 'Fixture: a portrait photo stored sideways'
