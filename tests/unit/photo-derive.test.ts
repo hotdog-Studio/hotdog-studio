@@ -1,6 +1,5 @@
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import exifr from 'exifr';
 import sharp from 'sharp';
 import { afterEach, describe, expect, it } from 'vitest';
 import { makeFixtureImage } from '../../scripts/fixtures/fixture-image';
@@ -94,18 +93,41 @@ describe('writeDerivatives', { timeout: 60_000 }, () => {
   });
 
   it('strips all metadata (§6.3)', async () => {
-    const { out, result } = await run(await readFile(newer1), 1600);
-    for (const source of [...result.avif, ...result.webp]) {
-      const meta = await metaOf(join(out, source.src.replace('/photos/', '')));
-      expect(meta.exif).toBeUndefined();
-      expect(meta.xmp).toBeUndefined();
-      expect(meta.iptc).toBeUndefined();
-      expect(meta.icc).toBeUndefined();
+    // Bait: newer-1 already carries GPS, a serial and an artist; add XMP and an ICC profile.
+    const xmp = Buffer.from(
+      '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>' +
+        '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
+        '<rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:creator>FIXTURE-XMP</dc:creator>' +
+        '</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>',
+    );
+    const bait = await sharp(await readFile(newer1))
+      .keepExif()
+      .withXmp(xmp.toString())
+      .withIccProfile('p3')
+      .jpeg()
+      .toBuffer();
+    // Preconditions: prove the bait can be detected, or the checks below prove nothing.
+    const baitMeta = await sharp(bait).metadata();
+    expect(baitMeta.exif).toBeDefined();
+    expect(baitMeta.xmp).toBeDefined();
+    expect(baitMeta.icc).toBeDefined();
+    const markers = ['FIXTURE-SERIAL', 'Fixture Artist', 'FIXTURE-XMP'];
+    for (const marker of markers) expect(bait.includes(marker)).toBe(true);
+
+    const { out, result } = await run(bait, 1600);
+    const sources = [...result.avif, ...result.webp];
+    expect(sources).toHaveLength(6);
+    for (const source of sources) {
+      const bytes = await readFile(join(out, source.src.replace('/photos/', '')));
+      const meta = await sharp(bytes).metadata();
+      expect(meta.exif, source.src).toBeUndefined();
+      expect(meta.xmp, source.src).toBeUndefined();
+      // sharp cannot write IPTC, so there is no IPTC precondition; this only guards a regression.
+      expect(meta.iptc, source.src).toBeUndefined();
+      expect(meta.icc, source.src).toBeUndefined();
+      for (const marker of markers)
+        expect(bytes.includes(marker), `${source.src} ${marker}`).toBe(false);
     }
-    const avif = result.avif[0];
-    expect(avif).toBeDefined();
-    const bytes = await readFile(join(out, (avif?.src ?? '').replace('/photos/', '')));
-    expect(await exifr.gps(bytes)).toBeUndefined();
   });
 
   it('never enlarges', async () => {
@@ -147,20 +169,17 @@ describe('writeDerivatives', { timeout: 60_000 }, () => {
 describe('pipeline source', () => {
   it('never asks sharp to keep metadata (§6.3)', async () => {
     const dir = join('scripts', 'photos');
-    const files = (await readdir(dir)).filter((f) => f.endsWith('.ts'));
+    const files = (await readdir(dir, { recursive: true })).filter((f) => /\.(m?ts|m?js)$/.test(f));
     expect(files.length).toBeGreaterThan(0);
+    const forbidden =
+      /\.(keep(Metadata|Exif|IccProfile|Xmp)|with(Metadata|Exif\w*|IccProfile|Xmp))\s*\(/;
+    const offenders: string[] = [];
     for (const file of files) {
-      const source = await readFile(join(dir, file), 'utf8');
-      for (const call of [
-        '.withMetadata(',
-        '.keepMetadata(',
-        '.keepExif(',
-        '.withExif(',
-        '.keepIccProfile(',
-        '.withIccProfile(',
-      ]) {
-        expect(source, `${file} contains ${call}`).not.toContain(call);
-      }
+      const lines = (await readFile(join(dir, file), 'utf8')).split(/\r?\n/);
+      lines.forEach((line, i) => {
+        if (forbidden.test(line)) offenders.push(`${file}:${i + 1}`);
+      });
     }
+    expect(offenders).toEqual([]);
   });
 });

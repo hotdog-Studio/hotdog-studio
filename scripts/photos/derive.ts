@@ -6,7 +6,7 @@
  * scans this folder's source to make sure that stays true.
  */
 import { createHash } from 'node:crypto';
-import { copyFile, mkdir, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rename, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import type { PhotoSource } from '../../src/lib/photos-schema';
@@ -80,7 +80,13 @@ export async function writeDerivatives(input: {
       const name = `${id}-${w}.${format}`;
       const cached = join(cache, name);
       // AVIF encoding is slow, so an unchanged photo is only ever copied from the cache.
-      if (!(await exists(cached))) await writeFile(cached, await encode(bytes, w, format));
+      if (!(await exists(cached))) {
+        // Write then rename, so an interrupted build never leaves a truncated file that
+        // would count as a cache hit for ever.
+        const temporary = `${cached}.${process.pid}.tmp`;
+        await writeFile(temporary, await encode(bytes, w, format));
+        await rename(temporary, cached);
+      }
       await copyFile(cached, join(albumDir, name));
       result[format].push({ w, src: `/photos/${album}/${name}` });
     }
