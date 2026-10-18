@@ -93,9 +93,9 @@ photos: # optional per-photo metadata, keyed by filename
 
 - **Formats.** `.jpg`, `.jpeg`, `.png`, `.tif`, `.tiff` and `.webp`, in any letter case. Anything else, RAW and HEIC included, fails the build with a list of the files, so export those as JPEG from your editor first.
 - **Alt text.** A photo without `alt` gets `<Album title>, photo <n> of <m>` and the build prints a warning naming the album and the files. Write real alt text for every photo before publishing.
-- **Drafts.** An album with `draft: true` shows under `npm run dev` and nowhere else. A build never reads, encodes or publishes it.
-- **Privacy.** The derivatives carry no EXIF, location or camera serial number. Only the camera, lens, focal length, aperture, shutter speed, ISO and date go into the manifest, and the album page shows them unless `showExif: false`.
-- **Problems.** The pipeline reports every problem in the folder in one go, and writes nothing until they are fixed. Two identical files in one album count as a problem.
+- **Drafts.** An album with `draft: true` shows under `npm run dev` and nowhere else. A build never publishes it, but its folder and `album.yaml` must still be valid, so a HEIC file or a bad `album.yaml` inside a draft album still fails the build.
+- **Privacy.** The derivatives carry no EXIF, location or camera serial number. Only the camera, lens, focal length, aperture, shutter speed, ISO and date go into the manifest, and the lightbox shows the camera, focal length, aperture, shutter speed and ISO (not the lens or the date) unless `showExif: false`.
+- **Problems.** The pipeline reports every problem it finds in a pass, and writes nothing until they are fixed. Folder and `album.yaml` problems come first; unreadable and duplicate photos (two identical files in one album) come in the next pass.
 - **Cache.** Encoding AVIF is slow, so finished derivatives are cached in `.cache/photos/`, keyed by the photo's content. Set `PHOTOS_CACHE_DIR` to keep the cache somewhere else, such as a folder that survives CI workspace clean-ups. Delete the folder to force a full re-encode.
 - **Fixtures.** `npm run build:fixtures` always uses the made-up photos in `fixtures/photos/`, whatever `PHOTOS_DIR` says. `npm run dev` falls back to them when `PHOTOS_DIR` is unset, but `npm run build` never does, because it would publish them as yours. `npm run fixtures:photos` regenerates them.
 
