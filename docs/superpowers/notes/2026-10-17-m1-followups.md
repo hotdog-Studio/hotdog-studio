@@ -8,11 +8,11 @@ Thomas reviewed the fixture build (`/`, `/work` and the three case-study source 
 
 ### Changes to make, in the M2 CSS pass and before M4 records the visual baselines
 
-- **Mobile gutter: fix it at 16px across the phone range,** as spec §7 says. It currently grows to about 19.5px at 390px and 21.5px at 430px (`clamp(var(--gutter), 5vw, 4rem)`). Use `clamp(var(--gutter), 8vw - 2rem, 4rem)` in one shared `--frame-gutter`.
-- **"See my work" gets a neutral fill:** solid `--color-text` with `--color-bg` text, in place of the mustard fill. That keeps mustard for links, focus rings and badges, as §7 describes. "Download CV" and "Email me" stay outlined.
-- **Code blocks scroll sideways instead of wrapping.** Drop `overflow-wrap: anywhere` and `white-space: pre-wrap` from `pre`, and give it `overflow-x: auto`, so identifiers stay whole. The page itself must still never scroll sideways at 320px. Because the block now scrolls, every `<pre>` needs `tabindex="0"` (axe `scrollable-region-focusable`). Prism doesn't add it, so a small rehype plugin must. Assert it in a test, and rewrite the "wrap rather than scroll" comment in `prism.css`.
-- **`::selection` becomes a soft mustard tint:** a pale mustard background, with the text keeping its own colour. Check the text's contrast on the tint in both themes.
-- **Quieter code palette: mustard and greys only.**
+- **Mobile gutter (done in M2, Task 1): fix it at 16px across the phone range,** as spec §7 says. It currently grows to about 19.5px at 390px and 21.5px at 430px (`clamp(var(--gutter), 5vw, 4rem)`). Use `clamp(var(--gutter), 8vw - 2rem, 4rem)` in one shared `--frame-gutter`.
+- **"See my work" (done in M2, Task 2) gets a neutral fill:** solid `--color-text` with `--color-bg` text, in place of the mustard fill. That keeps mustard for links, focus rings and badges, as §7 describes. "Download CV" and "Email me" stay outlined.
+- **Code blocks scroll sideways (done in M2, Task 2) instead of wrapping.** Drop `overflow-wrap: anywhere` and `white-space: pre-wrap` from `pre`, and give it `overflow-x: auto`, so identifiers stay whole. The page itself must still never scroll sideways at 320px. Because the block now scrolls, every `<pre>` needs `tabindex="0"` (axe `scrollable-region-focusable`). Prism doesn't add it, so a small rehype plugin must. Assert it in a test, and rewrite the "wrap rather than scroll" comment in `prism.css`.
+- **`::selection` (done in M2, Task 2) becomes a soft mustard tint:** a pale mustard background, with the text keeping its own colour. Check the text's contrast on the tint in both themes.
+- **Quieter code palette: mustard and greys only (done in M2, Task 2).**
   - Keywords stay mustard.
   - Strings, numbers, built-ins, class names and functions use the text colour.
   - Operators and punctuation use the muted grey.
@@ -36,17 +36,32 @@ Thomas reviewed the fixture build (`/`, `/work` and the three case-study source 
 
 ## M2 (photos)
 
-- **One CSS consolidation pass alongside the album grid.** It must land before M6, because one or two featured studies is a likely real state.
+- **One CSS consolidation pass alongside the album grid (done in M2, Task 1).** It must land before M6, because one or two featured studies is a likely real state.
   - Move to a single shared card grid: use `auto-fill` to remove the one-or-two-card stretch and keep the "Other things I build" strip aligned. `.sections`, the heading gap and the grid are currently repeated across `index.astro`, `work/index.astro` and `OtherProjects.astro`.
   - Share one panel recipe (border, radius, surface), currently repeated in SourceBlock, prism.css, CaseStudyCard and ReelRaffleCard. The focus-ring and radius values are also repeated, and the list reset appears in both SiteHeader and SiteFooter.
   - Fix the wrong 24px-target comment at `OtherProjects.astro:48`.
   - Put the tokens and global rules in `@layer base`. The global stylesheet currently loads after component CSS and wins only through scoping specificity.
-- `src/generated/photos.json` is git-ignored, but §9 runs `lint` (`astro check`) and the unit tests before any build. Don't import it statically from type-checked code, or generate it first.
-- Add browser globals to ESLint for `src/scripts/**`.
-- **Script inlining** (from the plan's carry-forward): set `vite.build.assetsInlineLimit` so the lightbox script is never inlined, and assert that there is no inline `<script>`.
-- **Dominant-colour placeholders** (from the plan's carry-forward): use a generated stylesheet, not `style` attributes.
-- Make the console guard include the source URL (`message.location().url`), so "Failed to load resource" names the asset.
-- Fix the `astro.config.ts` cacheDir comment: the content store lives in cacheDir for `build` and `check` only, while `astro dev` uses `.astro/`.
+- **Done in M2 (Task 9):** `src/generated/photos.json` is git-ignored, but §9 runs `lint` (`astro check`) and the unit tests before any build. Don't import it statically from type-checked code, or generate it first.
+- **Done in M2 (Task 11):** add browser globals to ESLint for `src/scripts/**`.
+- **Script inlining (done in M2, Task 11)** (from the plan's carry-forward): set `vite.build.assetsInlineLimit` so the lightbox script is never inlined, and assert that there is no inline `<script>`.
+- **Dominant-colour placeholders (done in M2, Tasks 8 and 9)** (from the plan's carry-forward): use a generated stylesheet, not `style` attributes.
+- **Done in M2 (Task 10):** make the console guard include the source URL (`message.location().url`), so "Failed to load resource" names the asset.
+- **Done in M2 (Task 2):** fix the `astro.config.ts` cacheDir comment: the content store lives in cacheDir for `build` and `check` only, while `astro dev` uses `.astro/`.
+
+## M2 carry-forward notes for M3–M5
+
+- **Re-encoded photos keep their URLs (M5).** Derivative names are `<id>-<width>`, where the id hashes the original. Bumping `PIPELINE_VERSION` re-encodes the derivatives under the same URLs. Under §8.8's `immutable`, one-year cache on `/photos/*`, visitors would keep the old bytes for a year. Before the first deploy, either put the pipeline version in the path, such as `/photos/v1/<album>/…`, or accept that a re-encode needs a cache purge.
+- **The real build needs `PHOTOS_DIR` (M5).** `npm run verify` must fall back to `fixtures/photos` with a loud notice (§9).
+- **Lighthouse (M5).** Album pages must keep script bytes at or under 15 KB, and the newest album page comes from `src/generated/photos.json` (§8.7).
+- **Accessibility (M5).** The axe gate's lightbox-open state (§8.5) should open the first photo of the newest album, by clicking it or with its `#id`.
+- **Privacy gate (M4).** `scripts/privacy-scan.ts` can reuse the metadata assertion from `photo-derive.test.ts`.
+- **Visual baselines (M4)** should include the lightbox open on `album-newer`.
+- **SEO (M3).** An album's `og:image` is its cover's largest WebP.
+- **Quality summary (M4).** `photosWithAlt` comes from the count of photos where `altIsFallback` is false.
+- **iOS Safari (Thomas, before M6):** check the full-height lightbox on a real iPhone with Safari's dynamic toolbar. It passes in the iPhone 14 emulation only.
+- **Lightbox announcements (M5 a11y):** the counter is a polite live region, so screen readers hear "2 / 3" (often read as "2 slash 3"), but not the photo's alt text or caption. Consider announcing "<alt>, photo 2 of 3".
+- **Lightbox hash timing:** the hash follows a move after a 250 ms pause, which keeps WebKit's history rate limit at bay. Opening and closing update it at once. A copied URL within 250 ms of a move points at the previous photo.
+- **The real build needs `PHOTOS_DIR`:** until Thomas has exports, run it locally with `$env:PHOTOS_DIR = 'fixtures/photos'`.
 
 ## M3 (about, 404, quality, SEO)
 
