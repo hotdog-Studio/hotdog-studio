@@ -114,6 +114,37 @@ test('the Close button does the same', async ({ page }) => {
   await expect(page).toHaveURL('/photos/album-newer');
 });
 
+test('closing still works after more moves than the history rate limit allows', async ({
+  page,
+}) => {
+  const album = new AlbumPage(page);
+  const lightbox = new Lightbox(page);
+  await album.goto('album-newer');
+  await album.thumbnails.first().click();
+  await expect(lightbox.dialog).toBeVisible();
+  // WebKit refuses history updates after about 100 in 10 seconds, and Firefox after about 200.
+  for (let move = 0; move < 120; move += 1) await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Escape');
+  await expect(lightbox.dialog).toBeHidden();
+  await expect(album.thumbnails.first()).toBeFocused();
+  await expect(page).toHaveURL('/photos/album-newer');
+});
+
+test('a held arrow key moves once, not once per repeat', async ({ page }) => {
+  const album = new AlbumPage(page);
+  const lightbox = new Lightbox(page);
+  await album.goto('album-newer');
+  await album.thumbnails.first().click();
+  await page.keyboard.down('ArrowRight');
+  await expect(lightbox.counter).toHaveText('2 / 3');
+  // A second keydown while the key is still down arrives with `repeat` set.
+  await page.keyboard.down('ArrowRight');
+  await page.keyboard.up('ArrowRight');
+  // A fresh press lands after the repeat: back on 1 if the repeat was ignored, 2 if it moved.
+  await page.keyboard.press('ArrowLeft');
+  await expect(lightbox.counter).toHaveText('1 / 3');
+});
+
 test('the hash follows the photo, and loading the album with it opens that photo', async ({
   page,
 }) => {

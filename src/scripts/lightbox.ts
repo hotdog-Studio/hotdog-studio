@@ -22,6 +22,24 @@ function source(type: string, srcset: string | undefined): HTMLSourceElement {
   return element;
 }
 
+/**
+ * Points the URL at a photo, or at the album with an empty hash, without adding a history entry.
+ * Browsers limit how often a page may do this: WebKit throws a SecurityError after about 100 calls
+ * in 10 seconds, and Firefox after about 200. The hash is only a convenience for sharing, so a
+ * refused update is ignored rather than allowed to break the lightbox. Moves are also batched, so
+ * the limits aren't reached in the first place (see HASH_DELAY_MS).
+ */
+function replaceHash(hash: string): void {
+  try {
+    history.replaceState(null, '', `${location.pathname}${location.search}${hash}`);
+  } catch {
+    // Rate-limited: the URL keeps its previous hash.
+  }
+}
+
+/** How long moves must pause before the hash follows them. */
+const HASH_DELAY_MS = 250;
+
 /** The URL's fragment, decoded. A malformed escape such as `#%` can't be a photo id, so it is ''. */
 function fragment(): string {
   try {
@@ -92,18 +110,36 @@ function enhance(): void {
     counter.textContent = `${index + 1} / ${items.length}`;
     setLine(caption, item.dataset.caption);
     setLine(exif, item.dataset.exif);
-    history.replaceState(null, '', `${location.pathname}${location.search}#${item.id}`);
+  };
+
+  // Opening and closing update the hash at once. A move updates it only once moves pause for
+  // HASH_DELAY_MS, so a quick run of presses or clicks costs one history update, not one each.
+  // Updates from moves are then at least that far apart, at most 40 in any 10 seconds, which keeps
+  // the rate limits (see replaceHash) out of reach, so closing can always clear the hash.
+  let pendingHash: number | undefined;
+  const hashOf = (index: number): string => `#${items[index]?.id ?? ''}`;
+  const hashNow = (hash: string): void => {
+    window.clearTimeout(pendingHash);
+    replaceHash(hash);
+  };
+  const hashSoon = (hash: string): void => {
+    window.clearTimeout(pendingHash);
+    pendingHash = window.setTimeout(() => replaceHash(hash), HASH_DELAY_MS);
   };
 
   const open = (index: number, from: HTMLAnchorElement): void => {
     opener = from;
     show(index);
+    hashNow(hashOf(index));
     if (!dialog.open) dialog.showModal();
   };
 
   // With one photo there is nowhere to go, and Lightbox.astro renders no Previous or Next.
   const move = (step: number): void => {
-    if (items.length > 1) show(wrap(current + step));
+    if (items.length < 2) return;
+    const index = wrap(current + step);
+    show(index);
+    hashSoon(hashOf(index));
   };
 
   items.forEach((item, index) => {
@@ -128,15 +164,19 @@ function enhance(): void {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     event.preventDefault();
+    // A held key repeats 11 to 33 times a second. Each repeat would fetch a full-size photo, so
+    // only a fresh press moves.
+    if (event.repeat) return;
     move(event.key === 'ArrowLeft' ? -1 : 1);
   });
 
   // Esc fires `cancel` and then `close`; the Close button's dialog.close() fires `close` alone.
   dialog.addEventListener('close', () => {
-    history.replaceState(null, '', `${location.pathname}${location.search}`);
     // The dialog would restore focus to whatever had it before it opened, but WebKit doesn't
-    // focus a link when it is clicked, so that can't be relied on to be the thumbnail.
+    // focus a link when it is clicked, so that can't be relied on to be the thumbnail. Focus
+    // comes first, so nothing that goes wrong with the URL can stop it.
     opener?.focus();
+    hashNow('');
   });
 
   // A shared /photos/<album>#<photoId> link opens that photo. Any other hash, such as #main from
