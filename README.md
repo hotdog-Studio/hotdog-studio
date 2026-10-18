@@ -14,19 +14,19 @@ The source of [hotdog.studio](https://hotdog.studio), Thomas Southcott's portfol
 
 ## Scripts
 
-| Script                     | What it does                                                                                                                                                                             |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`              | Processes the photos (drafts included), then starts the Astro dev server on <http://localhost:4321>. Drafts show here and nowhere else. Without `PHOTOS_DIR` it uses the fixture photos. |
-| `npm run build`            | Runs `npm run check:content` and `npm run photos`, then builds the real site into `dist/`. Drafts are left out. It needs `PHOTOS_DIR`.                                                   |
-| `npm run build:fixtures`   | Runs the same build with `SITE_MODE=fixtures`, reading `fixtures/` (photos included) and writing `dist-fixtures/`.                                                                       |
-| `npm run photos`           | Runs only the photo pipeline: scans the albums, writes the derivatives to `public/photos/` and the manifest to `src/generated/`.                                                         |
-| `npm run fixtures:photos`  | Regenerates the committed fixture photos in `fixtures/photos/`. You rarely need this.                                                                                                    |
-| `npm run preview:fixtures` | Serves `dist-fixtures/` on <http://localhost:4321>. Build it first.                                                                                                                      |
-| `npm run lint`             | Runs `astro check`, ESLint (no warnings allowed) and Prettier's check, then checks the case studies.                                                                                     |
-| `npm run format`           | Rewrites every file with Prettier.                                                                                                                                                       |
-| `npm run test:unit`        | Runs the Vitest unit and component tests and writes a JUnit report to `reports/junit/unit.xml`.                                                                                          |
-| `npm run test:e2e`         | Runs the Playwright suite against the fixture build and writes `reports/junit/e2e.xml`.                                                                                                  |
-| `npm run check:content`    | Checks the current mode's case studies against the content rules and fails on any error.                                                                                                 |
+| Script                     | What it does                                                                                                                                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`              | Processes the photos (drafts included), then starts the Astro dev server on <http://localhost:4321>. Drafts show here and nowhere else. Without `PHOTOS_DIR` it uses the fixture photos.                                          |
+| `npm run build`            | Runs `npm run check:content` and `npm run photos`, then builds the real site into `dist/`. Drafts are left out. It needs `PHOTOS_DIR`.                                                                                            |
+| `npm run build:fixtures`   | Runs the same build with `SITE_MODE=fixtures`, reading `fixtures/` (photos included) and writing `dist-fixtures/`.                                                                                                                |
+| `npm run photos`           | Runs only the photo pipeline: scans the albums, writes the derivatives to `public/photos/` and the manifest to `src/generated/`. In real mode it needs `PHOTOS_DIR`, and it leaves drafts out (only `npm run dev` includes them). |
+| `npm run fixtures:photos`  | Regenerates the committed fixture photos in `fixtures/photos/`. You rarely need this.                                                                                                                                             |
+| `npm run preview:fixtures` | Serves `dist-fixtures/` on <http://localhost:4321>. Build it first.                                                                                                                                                               |
+| `npm run lint`             | Runs `astro check`, ESLint (no warnings allowed) and Prettier's check, then checks the case studies.                                                                                                                              |
+| `npm run format`           | Rewrites every file with Prettier.                                                                                                                                                                                                |
+| `npm run test:unit`        | Runs the Vitest unit and component tests and writes a JUnit report to `reports/junit/unit.xml`.                                                                                                                                   |
+| `npm run test:e2e`         | Runs the Playwright suite against the fixture build and writes `reports/junit/e2e.xml`.                                                                                                                                           |
+| `npm run check:content`    | Checks the current mode's case studies against the content rules and fails on any error.                                                                                                                                          |
 
 ## CI order
 
