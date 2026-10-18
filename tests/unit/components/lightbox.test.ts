@@ -10,6 +10,8 @@ describe('Lightbox', () => {
     const doc = await renderHtml(Lightbox, { count: 3 });
     expect(doc.querySelector('dialog')?.getAttribute('aria-label')).toBe('Photo viewer');
     expect(buttonNames(doc)).toEqual(['Close', 'Previous', 'Next']);
+    // Moving leaves focus where it is, so the counter announces the new position.
+    expect(doc.querySelector('.counter')?.getAttribute('aria-live')).toBe('polite');
     // The script builds the picture, so the page never has an <img> without a src.
     expect(doc.querySelector('img')).toBeNull();
   });

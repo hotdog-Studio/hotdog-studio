@@ -9,7 +9,8 @@ const { count } = Astro.props;
 
 <dialog class="lightbox" aria-label="Photo viewer" data-lightbox>
   <div class="bar">
-    <p class="counter"></p>
+    {/* Moving leaves focus where it is, so the counter announces the new position instead. */}
+    <p class="counter" aria-live="polite" aria-atomic="true"></p>
     <button type="button" data-lightbox-close>
       Close
     </button>
