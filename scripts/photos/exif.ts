@@ -75,6 +75,19 @@ function takenOn(raw: RawExif | undefined): string | undefined {
   return real ? stamp.slice(0, 10).replaceAll(':', '-') : undefined;
 }
 
+/**
+ * A fraction only when the exposure is (nearly) a whole-number reciprocal, as cameras
+ * label 1/250; otherwise decimal seconds. Rounding 1/t blindly would turn 0.8 s into 1/1 s.
+ */
+function shutter(t: number): string {
+  if (t < 1) {
+    const r = 1 / t;
+    const n = Math.round(r);
+    if (n >= 2 && Math.abs(r - n) <= 0.02 * r) return `1/${n} s`;
+  }
+  return `${Number(t.toFixed(1))} s`;
+}
+
 export function mapExif(raw: RawExif | undefined): PhotoExif | undefined {
   if (raw === undefined) return undefined;
   const out: PhotoExif = {};
@@ -90,8 +103,7 @@ export function mapExif(raw: RawExif | undefined): PhotoExif | undefined {
   if (fNumber !== undefined) out.aperture = `f/${Number(fNumber.toFixed(1))}`;
   const exposure = positive(raw.ExposureTime);
   if (exposure !== undefined) {
-    out.shutter =
-      exposure >= 1 ? `${Number(exposure.toFixed(1))} s` : `1/${Math.round(1 / exposure)} s`;
+    out.shutter = shutter(exposure);
   }
   const iso = positive(raw.ISO);
   if (iso !== undefined && Number.isInteger(iso)) out.iso = iso;

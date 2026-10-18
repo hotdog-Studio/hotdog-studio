@@ -62,6 +62,10 @@ describe('mapExif', { timeout: 60_000 }, () => {
     [1, '1 s'],
     [2.5, '2.5 s'],
     [30, '30 s'],
+    [0.8, '0.8 s'],
+    [0.6, '0.6 s'],
+    [0.4, '0.4 s'],
+    [0.99, '1 s'],
   ])('formats a shutter speed of %f as %s', (ExposureTime, shutter) => {
     expect(mapExif({ ExposureTime })?.shutter).toBe(shutter);
   });
