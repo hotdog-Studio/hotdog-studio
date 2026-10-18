@@ -241,6 +241,49 @@ describe('photo pipeline', { timeout: 60_000 }, () => {
     });
   });
 
+  describe('unreadable images', () => {
+    it('names the file, reports every problem together and writes nothing', async () => {
+      const root = await temp();
+      const source = join(root, 'src');
+      const same = await image('same');
+      await writeAlbum(source, 'broken', {
+        'album.yaml': 'title: Broken\ndate: 2025-01-01\n',
+        'bad.jpg': 'not an image',
+      });
+      await writeAlbum(source, 'dupes', {
+        'album.yaml': 'title: Dupes\ndate: 2025-01-02\n',
+        'one.jpg': same,
+        'two.jpg': same,
+      });
+      const options = { sourceDir: source, includeDrafts: false, ...outputPaths(root) };
+      await mkdir(options.outputDir, { recursive: true });
+      await writeFile(join(options.outputDir, 'stale.txt'), 'old');
+
+      const error = await runPhotoPipeline(options).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PhotoPipelineError);
+      const message = (error as PhotoPipelineError).message;
+      expect(message).toContain('broken/bad.jpg: could not read the image');
+      expect(message).toContain('dupes: one.jpg and two.jpg are the same photo');
+      expect(await listAll(options.outputDir)).toEqual(['stale.txt']);
+    });
+
+    it('never reads the photos of a draft album that is left out', async () => {
+      const root = await temp();
+      const source = join(root, 'src');
+      await buildSource(source);
+      await writeAlbum(source, 'draft-broken', {
+        'album.yaml': 'title: Draft broken\ndate: 2026-02-01\ndraft: true\n',
+        'bad.jpg': 'not an image',
+      });
+      const result = await runPhotoPipeline({
+        sourceDir: source,
+        includeDrafts: false,
+        ...outputPaths(root),
+      });
+      expect(result.manifest.albums.map((a) => a.slug)).toEqual(['trip-b', 'trip-a']);
+    });
+  });
+
   describe('the CLI', () => {
     const run = (photosDir: string) =>
       spawnSync(process.execPath, ['--import', 'tsx', 'scripts/photos/process.ts'], {

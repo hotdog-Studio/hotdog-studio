@@ -62,7 +62,7 @@ export function placeholderCss(albums: readonly Album[]): string {
 
 type Prepared = {
   name: string;
-  bytes: Buffer;
+  path: string;
   id: string;
   takenAt: string | undefined;
   exif: Photo['exif'];
@@ -83,38 +83,45 @@ export async function runPhotoPipeline(options: PipelineOptions): Promise<Pipeli
   );
 
   const prepared = new Map<string, Prepared[]>();
-  const duplicates: string[] = [];
+  const problems: string[] = [];
   // One photo at a time: libvips already uses every core per image, and it keeps the cache
   // entries from racing.
   for (const album of scanned) {
     const seen = new Map<string, string>();
     const photos: Prepared[] = [];
     for (const photo of album.photos) {
-      // A buffer, never a path: on Windows sharp keeps path-opened files locked.
-      const bytes = await readFile(photo.path);
-      const id = photoId(bytes);
-      const first = seen.get(id);
-      if (first !== undefined) {
-        duplicates.push(`${album.slug}: ${first} and ${photo.name} are the same photo`);
-        continue;
+      try {
+        // A buffer, never a path: on Windows sharp keeps path-opened files locked. The buffer
+        // is dropped after this photo, so memory does not grow with the size of the library.
+        const bytes = await readFile(photo.path);
+        const id = photoId(bytes);
+        const first = seen.get(id);
+        if (first !== undefined) {
+          problems.push(`${album.slug}: ${first} and ${photo.name} are the same photo`);
+          continue;
+        }
+        seen.set(id, photo.name);
+        const raw = await readExif(bytes);
+        photos.push({
+          name: photo.name,
+          path: photo.path,
+          id,
+          takenAt: takenAt(raw),
+          exif: mapExif(raw),
+          // The oriented size, so never-enlarge sees what a browser would display.
+          ...(await describeImage(bytes)),
+          alt: photo.alt,
+          caption: photo.caption,
+        });
+      } catch (error) {
+        // Name the file: sharp's own messages do not, and one bad file should not hide the rest.
+        const reason = (error instanceof Error ? error.message : String(error)).split('\n')[0];
+        problems.push(`${album.slug}/${photo.name}: could not read the image (${reason})`);
       }
-      seen.set(id, photo.name);
-      const raw = await readExif(bytes);
-      photos.push({
-        name: photo.name,
-        bytes,
-        id,
-        takenAt: takenAt(raw),
-        exif: mapExif(raw),
-        // The oriented size, so never-enlarge sees what a browser would display.
-        ...(await describeImage(bytes)),
-        alt: photo.alt,
-        caption: photo.caption,
-      });
     }
     prepared.set(album.slug, photos);
   }
-  if (duplicates.length > 0) throw new PhotoPipelineError(options.sourceDir, duplicates);
+  if (problems.length > 0) throw new PhotoPipelineError(options.sourceDir, problems);
 
   const warnings: string[] = [];
   let photoCount = 0;
@@ -169,8 +176,15 @@ export async function runPhotoPipeline(options: PipelineOptions): Promise<Pipeli
     for (const [index, photo] of ordered.entries()) {
       const target = album.photos[index];
       if (target === undefined) continue;
+      // Read again rather than keeping every original in memory since the scan.
+      const bytes = await readFile(photo.path);
+      if (photoId(bytes) !== photo.id) {
+        throw new Error(
+          `${album.slug}/${photo.name} changed while the pipeline was running; run it again`,
+        );
+      }
       target.sources = await writeDerivatives({
-        bytes: photo.bytes,
+        bytes,
         id: photo.id,
         album: album.slug,
         width: photo.width,
