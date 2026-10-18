@@ -5,8 +5,9 @@
  */
 
 /*
- * Long lines wrap rather than scroll, so a code sample never scrolls sideways, even at 320px
- * (spec §7). With nothing to scroll, the block needs no tabindex to be keyboard-reachable.
+ * Long lines scroll inside the block, so identifiers stay whole and the page never scrolls
+ * sideways. focusablePre (src/lib/focusable-pre.ts) makes every block keyboard-focusable, which
+ * satisfies axe's scrollable-region-focusable.
  */
 pre {
   padding: 1rem clamp(0.875rem, 0.75rem + 0.5vw, 1.25rem);
@@ -15,9 +16,14 @@ pre {
   background: var(--color-surface);
   color: var(--color-text);
   line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: pre;
+  overflow-x: auto;
   tab-size: 2;
+}
+
+/* Only these tokens are coloured; every other token inherits the text colour. */
+.token.keyword {
+  color: var(--code-keyword);
 }
 
 .token.comment {
@@ -25,34 +31,7 @@ pre {
   font-style: italic;
 }
 
-.token.keyword {
-  color: var(--code-keyword);
-}
-
-.token.string {
-  color: var(--code-string);
-}
-
-.token.number {
-  color: var(--code-number);
-}
-
-.token.builtin {
-  color: var(--code-builtin);
-}
-
-.token.function {
-  color: var(--code-function);
-}
-
-.token.class-name {
-  color: var(--code-class-name);
-}
-
-.token.operator {
-  color: var(--code-operator);
-}
-
+.token.operator,
 .token.punctuation {
   color: var(--code-punctuation);
 }

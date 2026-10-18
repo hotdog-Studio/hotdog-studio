@@ -73,11 +73,11 @@ const { site } = Astro.props;
     text-decoration-line: underline;
   }
 
-  /* The one filled button. Its text is the page background: 5.3:1 in light, 11:1 in dark. */
+  /* The one filled button, in the text colour so mustard stays with links. Its text sits on the page background, at about 17:1 in light and 15:1 in dark. */
   .primary,
   .primary:hover {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
+    border-color: var(--color-text);
+    background: var(--color-text);
     color: var(--color-bg);
   }
 </style>

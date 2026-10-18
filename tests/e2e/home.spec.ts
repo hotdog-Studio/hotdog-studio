@@ -65,3 +65,12 @@ test('declares en-GB and ships no client-side JavaScript or inline styles', asyn
   await expect(page.locator('[style]')).toHaveCount(0);
   await expect(page.locator('style')).toHaveCount(0);
 });
+
+test('the primary hero action is filled in the text colour, leaving mustard to links', async ({
+  page,
+}) => {
+  const home = new HomePage(page);
+  await home.goto();
+  const text = await page.locator('body').evaluate((body) => getComputedStyle(body).color);
+  await expect(home.heroLink('See my work')).toHaveCSS('background-color', text);
+});

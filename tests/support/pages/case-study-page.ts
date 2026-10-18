@@ -4,6 +4,7 @@ import type { Locator, Page } from '@playwright/test';
 export class CaseStudyPage {
   readonly source: Locator;
   readonly sectionHeadings: Locator;
+  readonly codeBlocks: Locator;
   private readonly page: Page;
 
   constructor(page: Page) {
@@ -11,6 +12,7 @@ export class CaseStudyPage {
     this.source = page.getByRole('region', { name: 'Source', exact: true });
     // The body is the page's one article. A "## line" inside a code sample is text, not a heading.
     this.sectionHeadings = page.getByRole('article').getByRole('heading', { level: 2 });
+    this.codeBlocks = page.getByRole('article').locator('pre');
   }
 
   async goto(slug: string): Promise<void> {

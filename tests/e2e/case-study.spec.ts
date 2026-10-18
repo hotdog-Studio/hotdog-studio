@@ -123,3 +123,17 @@ test('the header gives the role, period, stack, source and repository', async ({
     'https://github.com/example/fixture-public',
   );
 });
+
+test('a long code line scrolls inside its block, which keyboard users can focus', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  const study = new CaseStudyPage(page);
+  await study.goto('fixture-public');
+  const code = study.codeBlocks.first();
+  await expect(code).toHaveAttribute('tabindex', '0');
+  expect(await code.evaluate((pre) => pre.scrollWidth > pre.clientWidth)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await code.focus();
+  await expect(code).toBeFocused();
+});
