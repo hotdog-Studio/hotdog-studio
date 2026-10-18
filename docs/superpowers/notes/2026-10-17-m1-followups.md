@@ -2,19 +2,37 @@
 
 M1 (Skeleton) was built on branch `m1-skeleton` from the plan `docs/superpowers/plans/2026-10-17-m1-skeleton.md`. Every task passed a spec and quality review, and a final whole-branch review followed. This note records what those reviews deliberately left for later, so the M2–M5 plans and the M6 content work can pick it up. It adds to the plan's own "Carry-forward notes" section.
 
-## Decide at the M1 visual check-in (Thomas)
+## M1 visual check-in (Thomas, 2026-10-18)
 
-- **Mobile gutter.** Spec §7 says "16px side gutters on mobile". The gutter is 16px at 320px but grows to about 19.5px at 390px and 21.5px at 430px (`clamp(var(--gutter), 5vw, 4rem)`). Decide before M4 records the visual baselines. A fix that keeps 16px across the phone range: `clamp(var(--gutter), 8vw - 2rem, 4rem)` in one shared `--frame-gutter`.
-- **Duplicate `featuredOrder`** is checked among featured studies only. §5.2 says "featuredOrder values are unique". This is a deliberate narrowing: the order only matters while a study is featured.
-- **One or two featured studies** stretch across the full width on `/` and `/work`, because `auto-fit` collapses the empty tracks. The fixture build always has three, so it never shows this.
-- **Visual taste:**
-  - mustard `::selection`;
-  - the filled mustard "See my work" button;
-  - whole-card links;
-  - Prism colours for function, class-name, operator and punctuation tokens, which the plan left unspecified;
-  - code that wraps with `overflow-wrap: anywhere` and can split identifiers at 320px.
-- **Two repository links on a case study** ("Repository" in the header and "View the repository" in the source block), both mandated by §4.4. A badge link is named only by its label.
-- **Real-mode `/work`** shows no empty-state copy while every study is a draft.
+Thomas reviewed the fixture build (`/`, `/work` and the three case-study source labels, at 320, 390 and 1280px in both themes). He approved the visual direction, with the changes below, and asked to discuss something before M2 is planned.
+
+### Changes to make, in the M2 CSS pass and before M4 records the visual baselines
+
+- **Mobile gutter: fix it at 16px across the phone range,** as spec §7 says. It currently grows to about 19.5px at 390px and 21.5px at 430px (`clamp(var(--gutter), 5vw, 4rem)`). Use `clamp(var(--gutter), 8vw - 2rem, 4rem)` in one shared `--frame-gutter`.
+- **"See my work" gets a neutral fill:** solid `--color-text` with `--color-bg` text, in place of the mustard fill. That keeps mustard for links, focus rings and badges, as §7 describes. "Download CV" and "Email me" stay outlined.
+- **Code blocks scroll sideways instead of wrapping.** Drop `overflow-wrap: anywhere` and `white-space: pre-wrap` from `pre`, and give it `overflow-x: auto`, so identifiers stay whole. The page itself must still never scroll sideways at 320px. Because the block now scrolls, every `<pre>` needs `tabindex="0"` (axe `scrollable-region-focusable`). Prism doesn't add it, so a small rehype plugin must. Assert it in a test, and rewrite the "wrap rather than scroll" comment in `prism.css`.
+- **`::selection` becomes a soft mustard tint:** a pale mustard background, with the text keeping its own colour. Check the text's contrast on the tint in both themes.
+- **Quieter code palette: mustard and greys only.**
+  - Keywords stay mustard.
+  - Strings, numbers, built-ins, class names and functions use the text colour.
+  - Operators and punctuation use the muted grey.
+  - Comments stay muted italic.
+  - Drop the green and blue `--code-*` values. With fewer colours, distinguish tokens by weight or style only if a sample reads badly.
+
+### Kept as built
+
+- **Both repository links on a case study** ("Repository" in the header and "View the repository" in the source block), as §4.4 mandates.
+- **Whole-card links.**
+- **One or two featured studies** stretch across the full width, because `auto-fit` collapses the empty tracks. The M2 grid consolidation below already fixes this.
+
+### Not raised at the check-in; the built behaviour stands
+
+- **Duplicate `featuredOrder`** is checked among featured studies only, though §5.2 says "featuredOrder values are unique". This is a deliberate narrowing: the order only matters while a study is featured.
+- **Real-mode `/work`** shows no empty-state copy while every study is a draft. The first deploy is in M6, after studies are published.
+
+### Noticed while preparing the check-in
+
+- `astro preview` returns 404 for slashed URLs such as `/work/`, because of `trailingSlash: 'never'` (§4.10). The M5 nginx config must 301 them to the slashless form (§10.2), and a container test should cover it.
 
 ## M2 (photos)
 
