@@ -1,0 +1,157 @@
+---
+interface Props {
+  /** The album's photo count. With one photo there is nowhere to move to, so no Previous or Next. */
+  count: number;
+}
+
+const { count } = Astro.props;
+---
+
+<dialog class="lightbox" aria-label="Photo viewer" data-lightbox>
+  <div class="bar">
+    <p class="counter"></p>
+    <button type="button" data-lightbox-close>
+      Close
+    </button>
+  </div>
+  <figure>
+    <div class="picture" data-lightbox-picture></div>
+    <figcaption>
+      <p class="caption" hidden></p>
+      <p class="exif" hidden></p>
+    </figcaption>
+  </figure>
+  {count > 1 && (
+    <>
+      <button type="button" data-lightbox-prev>
+        Previous
+      </button>
+      <button type="button" data-lightbox-next>
+        Next
+      </button>
+    </>
+  )}
+</dialog>
+
+<script>
+  import '../scripts/lightbox';
+</script>
+
+<style>
+  /*
+   * The backdrop is near-black in both themes (spec §7), so every colour in here is fixed rather
+   * than a theme token. It is lightest over a white page, at about #191919, where #ededed text
+   * reaches about 15:1, the #a8a8a8 EXIF line 7.4:1, and button text on #262626 about 12.9:1.
+   * There are no transitions or animations at all (spec §4.6).
+   */
+  .lightbox {
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    max-block-size: none;
+    margin: 0;
+    border: 0;
+    padding: var(--gutter);
+    background: transparent;
+    color: #ededed;
+    color-scheme: dark;
+  }
+
+  /* Only while open: a display value on the closed dialog would override the UA's display: none. */
+  .lightbox[open] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'bar bar'
+      'figure figure'
+      'prev next';
+    gap: 0.75rem;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(10 10 10 / 0.94);
+  }
+
+  .bar {
+    grid-area: bar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .counter {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  figure {
+    grid-area: figure;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  /* The photo fills whatever room the bar, the caption and the buttons leave, drawn whole. */
+  .picture {
+    position: relative;
+  }
+
+  /* The script builds the picture, so its <img> has no scoping attribute and needs :global. */
+  .picture :global(img) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    object-fit: contain;
+  }
+
+  figcaption p {
+    margin: 0;
+    text-align: center;
+  }
+
+  .exif {
+    color: #a8a8a8;
+    font-size: var(--step--1);
+  }
+
+  button {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #8a8a8a;
+    border-radius: var(--radius);
+    background: #262626;
+    color: #ededed;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #3a3a3a;
+  }
+
+  [data-lightbox-prev] {
+    grid-area: prev;
+    justify-self: start;
+  }
+
+  [data-lightbox-next] {
+    grid-area: next;
+    justify-self: end;
+  }
+
+  /* The light theme's accent is too dark to see on the backdrop; the dark theme's isn't. */
+  .lightbox :focus-visible {
+    outline-color: #f2c230;
+  }
+
+  /* Stops the page scrolling behind the open dialog. */
+  :global(:root:has(dialog[open])) {
+    overflow: hidden;
+  }
+</style>

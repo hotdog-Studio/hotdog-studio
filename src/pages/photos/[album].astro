@@ -1,4 +1,5 @@
 ---
+import Lightbox from '../../components/Lightbox.astro';
 import PhotoGrid from '../../components/PhotoGrid.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { loadPhotoManifest } from '../../lib/photo-manifest';
@@ -33,6 +34,7 @@ const month = formatAlbumDate(album.date);
       {album.description !== undefined && <p>{album.description}</p>}
     </header>
     <PhotoGrid items={lightboxItems(album)} label="Photos" eager={3} />
+    <Lightbox count={album.photos.length} />
   </div>
 </BaseLayout>
 

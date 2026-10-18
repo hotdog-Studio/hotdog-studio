@@ -18,6 +18,9 @@ export default defineConfig({
   // per mode avoids duplicate-slug warnings and stale entries. `astro dev` uses `.astro/`.
   cacheDir: `./node_modules/.astro-${mode}`,
   vite: {
+    // Astro inlines any script smaller than this many bytes into the page, and `script-src 'self'`
+    // (spec §10.2) blocks an inline script. At 0, the lightbox always ships as its own file.
+    build: { assetsInlineLimit: 0 },
     resolve: {
       alias: {
         '@site-config': fileURLToPath(new URL(`./${paths.siteConfig}`, import.meta.url)),

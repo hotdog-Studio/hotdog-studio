@@ -24,6 +24,8 @@ export default defineConfig(
   tseslint.configs.strict,
   astro.configs.recommended,
   { languageOptions: { globals: globals.node } },
+  // Client scripts run in the browser, bundled by Astro.
+  { files: ['src/scripts/**'], languageOptions: { globals: globals.browser } },
   // The full preset is for specs only. Page objects get just the blocking rules below, and the
   // shared fixtures file under tests/support is deliberately out of scope.
   { files: ['tests/e2e/**'], ...playwright.configs['flat/recommended'] },
