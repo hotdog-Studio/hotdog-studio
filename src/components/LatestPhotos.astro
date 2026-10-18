@@ -1,0 +1,19 @@
+---
+import { albumHref, formatAlbumDate, latestItems } from '../lib/photos';
+import type { Album } from '../lib/photos-schema';
+import PhotoGrid from './PhotoGrid.astro';
+
+interface Props {
+  album: Album;
+}
+
+const { album } = Astro.props;
+---
+
+<section aria-labelledby="latest-photos-heading" class="stack">
+  <h2 id="latest-photos-heading">Latest photos</h2>
+  <p>
+    From <a href={albumHref(album.slug)}>{album.title}</a>, {formatAlbumDate(album.date)}.
+  </p>
+  <PhotoGrid items={latestItems(album)} />
+</section>

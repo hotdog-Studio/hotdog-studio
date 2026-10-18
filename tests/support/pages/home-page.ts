@@ -1,12 +1,13 @@
 import type { Locator, Page } from '@playwright/test';
 
-/** The home page: the open-to-work banner, the hero, the featured work and the Reel Raffle card. */
+/** The home page: the open-to-work banner, the hero, the featured work, the Reel Raffle card and the latest photos. */
 export class HomePage {
   readonly banner: Locator;
   readonly hero: Locator;
   readonly featured: Locator;
   readonly featuredTitles: Locator;
   readonly reelRaffle: Locator;
+  readonly latestPhotos: Locator;
   private readonly page: Page;
 
   constructor(page: Page) {
@@ -17,6 +18,7 @@ export class HomePage {
     this.featured = page.getByRole('region', { name: 'Featured work' });
     this.featuredTitles = this.featured.getByRole('heading', { level: 3 });
     this.reelRaffle = page.getByRole('region', { name: 'Built and shipped' });
+    this.latestPhotos = page.getByRole('region', { name: 'Latest photos' });
   }
 
   async goto(): Promise<void> {

@@ -1,0 +1,62 @@
+---
+import { THUMB_SIZES, srcset } from '../lib/photos';
+import type { PhotoGridItem } from '../lib/photos';
+import ThumbnailPicture from './ThumbnailPicture.astro';
+
+interface Props {
+  items: readonly PhotoGridItem[];
+  label?: string | undefined;
+  /** How many of the first thumbnails load eagerly; the rest are lazy. */
+  eager?: number | undefined;
+}
+
+const { items, label, eager = 0 } = Astro.props;
+---
+
+<ul class="photo-grid bare-list" role="list" aria-label={label}>
+  {items.map(({ photo, href, lightbox }, index) => (
+    <li>
+      {lightbox === undefined ? (
+        <a href={href}>
+          <ThumbnailPicture
+            photo={photo}
+            sizes={THUMB_SIZES}
+            loading={index < eager ? 'eager' : 'lazy'}
+          />
+        </a>
+      ) : (
+        <a
+          href={href}
+          id={photo.id}
+          data-lightbox-item
+          data-avif={srcset(photo.sources.avif)}
+          data-webp={srcset(photo.sources.webp)}
+          data-width={photo.width}
+          data-height={photo.height}
+          data-caption={lightbox.caption}
+          data-exif={lightbox.exifLine}
+        >
+          <ThumbnailPicture
+            photo={photo}
+            sizes={THUMB_SIZES}
+            loading={index < eager ? 'eager' : 'lazy'}
+          />
+        </a>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-grid);
+  }
+
+  .photo-grid a {
+    display: block;
+    border-radius: calc(var(--radius) - 2px);
+    overflow: hidden;
+  }
+</style>

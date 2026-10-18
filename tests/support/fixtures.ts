@@ -15,7 +15,10 @@ export const test = base.extend<{ consoleGuard: void; offlineRouting: void }>({
     async ({ page }, use) => {
       const errors: string[] = [];
       page.on('console', (message) => {
-        if (message.type() === 'error') errors.push(message.text());
+        if (message.type() !== 'error') return;
+        // "Failed to load resource" doesn't say which one, so name the URL it came from.
+        const { url } = message.location();
+        errors.push(url === '' ? message.text() : `${message.text()} (${url})`);
       });
       page.on('pageerror', (error) => errors.push(error.message));
       await use();

@@ -2,14 +2,18 @@
 import site from '@site-config';
 import CaseStudyCard from '../components/CaseStudyCard.astro';
 import Hero from '../components/Hero.astro';
+import LatestPhotos from '../components/LatestPhotos.astro';
 import OpenToWorkBanner from '../components/OpenToWorkBanner.astro';
 import ReelRaffleCard from '../components/ReelRaffleCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getVisibleCaseStudies } from '../lib/case-studies';
+import { loadPhotoManifest } from '../lib/photo-manifest';
 import { caseStudyHref, reelRaffleCaseStudyHref, selectFeatured } from '../lib/work';
+import '../generated/photo-placeholders.css';
 
 const studies = await getVisibleCaseStudies();
 const featured = selectFeatured(studies);
+const newest = (await loadPhotoManifest()).albums[0];
 ---
 
 <BaseLayout description={site.pitch}>
@@ -35,5 +39,6 @@ const featured = selectFeatured(studies);
       </section>
     )}
     <ReelRaffleCard url={site.links.reelRaffle} caseStudyHref={reelRaffleCaseStudyHref(studies)} />
+    {newest && <LatestPhotos album={newest} />}
   </div>
 </BaseLayout>

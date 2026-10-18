@@ -1,0 +1,44 @@
+---
+import PhotoGrid from '../../components/PhotoGrid.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadPhotoManifest } from '../../lib/photo-manifest';
+import { formatAlbumDate, formatPhotoCount, lightboxItems } from '../../lib/photos';
+import type { Album } from '../../lib/photos-schema';
+import '../../generated/photo-placeholders.css';
+
+export async function getStaticPaths() {
+  const { albums } = await loadPhotoManifest();
+  return albums.map((album) => ({ params: { album: album.slug }, props: { album } }));
+}
+
+interface Props {
+  album: Album;
+}
+
+const { album } = Astro.props;
+const count = formatPhotoCount(album.photos.length);
+const month = formatAlbumDate(album.date);
+---
+
+<BaseLayout
+  title={album.title}
+  description={album.description ?? `${album.title}: ${count} from ${month}.`}
+>
+  <div class="stack">
+    <header class="stack">
+      <h1>{album.title}</h1>
+      <p class="meta">
+        <time datetime={album.date}>{month}</time> · {count}
+      </p>
+      {album.description !== undefined && <p>{album.description}</p>}
+    </header>
+    <PhotoGrid items={lightboxItems(album)} label="Photos" eager={3} />
+  </div>
+</BaseLayout>
+
+<style>
+  .meta {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -50,6 +50,20 @@ test('the Reel Raffle card links to the product and to its published case study'
   );
 });
 
+test('shows the latest photos from the newest published album', async ({ page }) => {
+  const home = new HomePage(page);
+  await home.goto();
+  // exact: the third thumbnail's fallback alt also contains the album title.
+  await expect(
+    home.latestPhotos.getByRole('link', { name: 'Fixture newer album', exact: true }),
+  ).toHaveAttribute('href', '/photos/album-newer');
+  const thumbnails = home.latestPhotos.getByRole('list').getByRole('link');
+  await expect(thumbnails).toHaveCount(3);
+  for (const link of await thumbnails.all()) {
+    await expect(link).toHaveAttribute('href', /^\/photos\/album-newer#[0-9a-f]{10}$/);
+  }
+});
+
 test('a featured card opens its case study', async ({ page }) => {
   const home = new HomePage(page);
   await home.goto();
