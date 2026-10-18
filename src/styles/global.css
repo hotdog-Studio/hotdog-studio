@@ -3,173 +3,214 @@
  * scoped <style>.
  */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-/* A column, so the footer sits at the bottom of a short page. */
-body {
-  display: flex;
-  flex-direction: column;
-  min-block-size: 100dvh;
-  margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: var(--step-0);
-  line-height: 1.6;
-  overflow-wrap: break-word;
-}
-
-main {
-  flex-grow: 1;
-  padding-block: clamp(2rem, 1rem + 4vw, 4.5rem);
-}
-
-/*
- * The frame the header, main and footer share: --gutter at each side on a phone, widening with
- * the viewport, and never more than --wide across.
- */
-.frame {
-  inline-size: min(100% - 2 * clamp(var(--gutter), 5vw, 4rem), var(--wide));
-  margin-inline: auto;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  margin-block: 0 0.5em;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
-
-h1 {
-  font-size: var(--step-4);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-h2 {
-  font-size: var(--step-3);
-}
-
-h3 {
-  font-size: var(--step-2);
-}
-
-h4 {
-  font-size: var(--step-1);
-}
-
-p,
-ul,
-ol,
-dl,
-blockquote,
-pre,
-figure {
-  margin-block: 0 1em;
-}
-
-p {
-  text-wrap: pretty;
-}
-
-a {
-  color: var(--color-accent);
-  text-decoration-line: underline;
-  text-decoration-thickness: max(1px, 0.0625em);
-  text-underline-offset: 0.2em;
-}
-
-a:hover {
-  text-decoration-thickness: max(2px, 0.125em);
-}
-
-code,
-kbd,
-samp,
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-}
-
-pre code {
-  font-size: inherit;
-}
-
-/* A wide image shrinks to fit, keeping its shape, so nothing scrolls sideways at 320px. */
-img,
-video {
-  max-inline-size: 100%;
-  block-size: auto;
-}
-
-::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
-}
-
-:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-/* Hidden until it takes focus, but still read out and reachable with Tab. */
-.skip-link {
-  position: absolute;
-  inset-block-start: 0.75rem;
-  inset-inline-start: var(--gutter);
-  z-index: 1;
-  padding: 0.5rem 1rem;
-  background: var(--color-bg);
-  font-weight: 600;
-}
-
-.skip-link:not(:focus) {
-  clip-path: inset(50%);
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/*
- * The skip link's target takes focus only so that the next Tab starts inside it. It isn't a
- * control, so it gets no focus ring.
- */
-main:focus {
-  outline: none;
-}
-
-.prose {
-  max-inline-size: var(--measure);
-}
-
-/* Room above a heading that follows text, but not above one that follows another heading. */
-.prose :not(h2, h3) + :is(h2, h3) {
-  margin-block-start: 1.5em;
-}
-
-@media (prefers-reduced-motion: reduce) {
+/* A base layer, so the scoped component styles, which are unlayered, win without relying on load order. */
+@layer base {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* A column, so the footer sits at the bottom of a short page. */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100dvh;
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+
+  main {
+    flex-grow: 1;
+    padding-block: clamp(2rem, 1rem + 4vw, 4.5rem);
+  }
+
+  /*
+ * The frame the header, main and footer share: --gutter at each side on a phone, widening with
+ * the viewport (--frame-gutter), and never more than --wide across.
+ */
+  .frame {
+    inline-size: min(100% - 2 * var(--frame-gutter), var(--wide));
+    margin-inline: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin-block: 0 0.5em;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: var(--step-3);
+  }
+
+  h3 {
+    font-size: var(--step-2);
+  }
+
+  h4 {
+    font-size: var(--step-1);
+  }
+
+  p,
+  ul,
+  ol,
+  dl,
+  blockquote,
+  pre,
+  figure {
+    margin-block: 0 1em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration-line: underline;
+    text-decoration-thickness: max(1px, 0.0625em);
+    text-underline-offset: 0.2em;
+  }
+
+  a:hover {
+    text-decoration-thickness: max(2px, 0.125em);
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  pre code {
+    font-size: inherit;
+  }
+
+  /* A wide image shrinks to fit, keeping its shape, so nothing scrolls sideways at 320px. */
+  img,
+  video {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Hidden until it takes focus, but still read out and reachable with Tab. */
+  .skip-link {
+    position: absolute;
+    inset-block-start: 0.75rem;
+    inset-inline-start: var(--gutter);
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    background: var(--color-bg);
+    font-weight: 600;
+  }
+
+  .skip-link:not(:focus) {
+    clip-path: inset(50%);
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /*
+ * The skip link's target takes focus only so that the next Tab starts inside it. It isn't a
+ * control, so it gets no focus ring.
+ */
+  main:focus {
+    outline: none;
+  }
+
+  .prose {
+    max-inline-size: var(--measure);
+  }
+
+  /* Room above a heading that follows text, but not above one that follows another heading. */
+  .prose :not(h2, h3) + :is(h2, h3) {
+    margin-block-start: 1.5em;
+  }
+
+  /* A gap rather than margins, so a section that is left out leaves no hole behind. */
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+  }
+
+  /* The gap spaces a heading from what follows it, so it needs no bottom margin as well. */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack);
+  }
+
+  .stack > :is(h1, h2) {
+    margin-block-end: 0;
+  }
+
+  /* One column at 320px. With auto-fill, one or two cards keep the card width rather than stretching. */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min)), 1fr));
+    gap: var(--space-grid);
+  }
+
+  .panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+  }
+
+  /* Keep role="list" where a list uses this, as Safari drops the role from a list with no bullets. */
+  .bare-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

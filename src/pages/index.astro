@@ -14,14 +14,14 @@ const featured = selectFeatured(studies);
 
 <BaseLayout description={site.pitch}>
   <div class="sections">
-    <div class="intro">
+    <div class="intro stack">
       <OpenToWorkBanner openToWork={site.openToWork} />
       <Hero site={site} />
     </div>
     {featured.length > 0 && (
       <section aria-labelledby="featured-heading">
         <h2 id="featured-heading">Featured work</h2>
-        <div class="cards">
+        <div class="card-grid">
           {featured.map(({ id, data }) => (
             <CaseStudyCard
               href={caseStudyHref(id)}
@@ -37,25 +37,3 @@ const featured = selectFeatured(studies);
     <ReelRaffleCard url={site.links.reelRaffle} caseStudyHref={reelRaffleCaseStudyHref(studies)} />
   </div>
 </BaseLayout>
-
-<style>
-  /* A gap rather than margins, so a section that is left out leaves no hole behind. */
-  .sections {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
-  }
-
-  .intro {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
-  }
-
-  /* One column at 320px, and never more columns than there are cards. */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: clamp(1rem, 0.75rem + 1vw, 1.5rem);
-  }
-</style>

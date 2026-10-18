@@ -81,3 +81,16 @@ test('declares en-GB and ships no client-side JavaScript or inline styles', asyn
   await expect(page.locator('[style]')).toHaveCount(0);
   await expect(page.locator('style')).toHaveCount(0);
 });
+
+test('the Other things I build columns line up with the case-study cards', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/work');
+  const card = await page.getByRole('main').getByRole('article').first().boundingBox();
+  const project = await page
+    .getByRole('region', { name: 'Other things I build' })
+    .getByRole('listitem')
+    .first()
+    .boundingBox();
+  expect(project?.x).toBeCloseTo(card?.x ?? Number.NaN, 0);
+  expect(project?.width).toBeCloseTo(card?.width ?? Number.NaN, 0);
+});

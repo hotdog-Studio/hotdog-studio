@@ -13,7 +13,7 @@ const { projects } = Astro.props;
 {projects.length > 0 && (
   <section aria-labelledby="other-projects-heading">
     <h2 id="other-projects-heading">Other things I build</h2>
-    <ul class="projects" role="list">
+    <ul class="projects card-grid bare-list" role="list">
       {projects.map(({ name, description, repo }) => (
         <li>
           <a href={repo}>{name}</a>
@@ -26,16 +26,11 @@ const { projects } = Astro.props;
 
 <style>
   /*
-   * Columns as wide as the case-study cards above them, so the two line up. The tracks are
-   * auto-fill, so a short strip keeps that width instead of stretching across the frame.
+   * Columns as wide as the case-study cards above them, so the two line up. The .card-grid tracks
+   * are auto-fill, so a short strip keeps that width instead of stretching across the frame.
    */
   .projects {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-    gap: 1.5rem clamp(1rem, 0.75rem + 1vw, 1.5rem);
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    row-gap: 1.5rem;
   }
 
   /* A hairline rather than a box, so the strip stays quieter than the case-study cards. */
@@ -45,12 +40,12 @@ const { projects } = Astro.props;
   }
 
   /*
-   * The padding lifts the link to a 24px target (WCAG 2.5.8). An inline-block is as wide as its
-   * longest word, so `anywhere` lets a long repo name break rather than spill out of its column.
+   * The --step-1 line box (x 1.6) is already over 30px at 320px, so it clears the 24px target
+   * (WCAG 2.5.8) with no padding. An inline-block is as wide as its longest word, so `anywhere`
+   * lets a long repo name break rather than spill out of its column.
    */
   a {
     display: inline-block;
-    padding-block: 0.125rem;
     font-size: var(--step-1);
     font-weight: 600;
     overflow-wrap: anywhere;

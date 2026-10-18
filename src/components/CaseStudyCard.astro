@@ -17,7 +17,7 @@ const { href, title, summary, stack, source, headingLevel = 3 } = Astro.props;
 const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
 
-<article class="card">
+<article class="card panel">
   <Heading class="title">
     <a href={href}>{title}</a>
   </Heading>
@@ -35,9 +35,6 @@ const Heading = headingLevel === 2 ? 'h2' : 'h3';
     flex-direction: column;
     gap: 0.75rem;
     padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    background: var(--color-surface);
     transition: border-color 150ms ease-out;
   }
 
@@ -60,7 +57,7 @@ const Heading = headingLevel === 2 ? 'h2' : 'h3';
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
   }
 
   .card:hover .title a,
@@ -75,7 +72,7 @@ const Heading = headingLevel === 2 ? 'h2' : 'h3';
   }
 
   .title a:focus-visible::after {
-    outline: 3px solid var(--color-accent);
+    outline: var(--focus-ring);
     outline-offset: 2px;
   }
 

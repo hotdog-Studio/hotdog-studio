@@ -33,3 +33,16 @@ test('the footer shows the build stamp and links to the quality page', async ({ 
     footer.getByRole('link', { name: 'Built with Astro, tested with Playwright' }),
   ).toHaveAttribute('href', '/quality');
 });
+
+test('keeps a 16px gutter across phone widths and widens on the desktop', async ({ page }) => {
+  for (const [width, gutter] of [
+    [320, 16],
+    [390, 16],
+    [430, 16],
+    [1280, 64],
+  ] as const) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/');
+    expect((await page.getByRole('main').boundingBox())?.x, `${width}px`).toBeCloseTo(gutter, 0);
+  }
+});

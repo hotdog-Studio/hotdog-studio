@@ -20,7 +20,7 @@ const contactLinks = [
 ---
 
 <footer class="site-footer frame">
-  <ul class="contact" role="list">
+  <ul class="contact bare-list" role="list">
     {contactLinks.map(({ label, href }) => (
       <li>
         <a href={href}>{label}</a>
@@ -52,9 +52,6 @@ const contactLinks = [
     display: flex;
     flex-wrap: wrap;
     gap: 0 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   /* The padding lifts each link to a 24px target (WCAG 2.5.8) at this small size. */

@@ -3,63 +3,76 @@
  * badges. Text, muted text and the accent all reach 4.5:1 on --color-bg and --color-surface in
  * both themes. The theme follows prefers-color-scheme only; there is no toggle.
  */
-:root {
-  color-scheme: light dark;
+/* A base layer, so the scoped component styles, which are unlayered, win without relying on load order. */
+@layer base {
+  :root {
+    color-scheme: light dark;
 
-  --color-bg: #ffffff;
-  --color-surface: #f6f6f4;
-  --color-text: #1a1a1a;
-  --color-text-muted: #555555;
-  --color-border: #dddddd;
-  --color-accent: #8a6500;
+    --color-bg: #ffffff;
+    --color-surface: #f6f6f4;
+    --color-text: #1a1a1a;
+    --color-text-muted: #555555;
+    --color-border: #dddddd;
+    --color-accent: #8a6500;
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 
-  /*
+    /*
    * Fluid type scale: 16px body text with a 1.2 ratio at a 320px viewport, growing to 18px with a
    * 1.25 ratio at 1280px. Each step is in rem at both ends, so it follows the reader's font size.
    */
-  --step--1: clamp(0.8333rem, 0.8111rem + 0.1111vw, 0.9rem);
-  --step-0: clamp(1rem, 0.9583rem + 0.2083vw, 1.125rem);
-  --step-1: clamp(1.2rem, 1.1312rem + 0.3438vw, 1.4063rem);
-  --step-2: clamp(1.44rem, 1.3341rem + 0.5297vw, 1.7578rem);
-  --step-3: clamp(1.728rem, 1.5716rem + 0.7821vw, 2.1973rem);
-  --step-4: clamp(2.0736rem, 1.8493rem + 1.1216vw, 2.7466rem);
+    --step--1: clamp(0.8333rem, 0.8111rem + 0.1111vw, 0.9rem);
+    --step-0: clamp(1rem, 0.9583rem + 0.2083vw, 1.125rem);
+    --step-1: clamp(1.2rem, 1.1312rem + 0.3438vw, 1.4063rem);
+    --step-2: clamp(1.44rem, 1.3341rem + 0.5297vw, 1.7578rem);
+    --step-3: clamp(1.728rem, 1.5716rem + 0.7821vw, 2.1973rem);
+    --step-4: clamp(2.0736rem, 1.8493rem + 1.1216vw, 2.7466rem);
 
-  --measure: 70ch;
-  --wide: 1400px;
-  --gutter: 16px;
+    --measure: 70ch;
+    --wide: 1400px;
+    --gutter: 16px;
+    /* 16px up to 600px wide, then growing to 64px at 1200px. */
+    --frame-gutter: clamp(var(--gutter), 8vw - 2rem, 4rem);
+    --radius: 0.5rem;
+    --focus-ring: 3px solid var(--color-accent);
 
-  /*
+    /* Vertical rhythm: between page sections, between a section's own parts, and between cards. */
+    --space-section: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
+    --space-stack: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+    --space-grid: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+    --card-min: 18rem;
+
+    /*
    * Code colours, for the Prism token classes in prism.css. Each reaches 4.5:1 on --color-surface,
    * the code block's background, in both themes. Built-in and class names share the number blue,
    * function names stay in the text colour, and operators and punctuation step back to the muted
    * grey. The shared ones are aliases, so they follow the theme without being set twice.
    */
-  --code-comment: #5f5f5f;
-  --code-keyword: #8a6500;
-  --code-string: #2f6f3e;
-  --code-number: #1f5fa8;
-  --code-builtin: var(--code-number);
-  --code-class-name: var(--code-number);
-  --code-function: var(--color-text);
-  --code-operator: var(--color-text-muted);
-  --code-punctuation: var(--color-text-muted);
-}
+    --code-comment: #5f5f5f;
+    --code-keyword: #8a6500;
+    --code-string: #2f6f3e;
+    --code-number: #1f5fa8;
+    --code-builtin: var(--code-number);
+    --code-class-name: var(--code-number);
+    --code-function: var(--color-text);
+    --code-operator: var(--color-text-muted);
+    --code-punctuation: var(--color-text-muted);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111111;
-    --color-surface: #1c1c1c;
-    --color-text: #ededed;
-    --color-text-muted: #a8a8a8;
-    --color-border: #333333;
-    --color-accent: #f2c230;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #111111;
+      --color-surface: #1c1c1c;
+      --color-text: #ededed;
+      --color-text-muted: #a8a8a8;
+      --color-border: #333333;
+      --color-accent: #f2c230;
 
-    --code-comment: #a0a0a0;
-    --code-keyword: #f2c230;
-    --code-string: #8fd19e;
-    --code-number: #8ab4f8;
+      --code-comment: #a0a0a0;
+      --code-keyword: #f2c230;
+      --code-string: #8fd19e;
+      --code-number: #8ab4f8;
+    }
   }
 }

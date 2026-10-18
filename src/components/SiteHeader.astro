@@ -22,7 +22,7 @@ const { name, pathname } = Astro.props;
     </span>
   </div>
   <nav aria-label="Main">
-    <ul>
+    <ul class="bare-list">
       {NAV_ITEMS.map((item) => (
         <li>
           <a href={item.href} aria-current={isCurrent(pathname, item.href) ? 'page' : undefined}>
@@ -79,9 +79,6 @@ const { name, pathname } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     gap: 0 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   nav a {

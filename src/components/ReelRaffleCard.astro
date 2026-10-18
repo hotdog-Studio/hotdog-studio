@@ -10,7 +10,7 @@ const { url, caseStudyHref } = Astro.props;
 
 <section aria-labelledby="built-and-shipped-heading">
   <h2 id="built-and-shipped-heading">Built and shipped</h2>
-  <div class="card">
+  <div class="card panel">
     <h3>Reel Raffle</h3>
     <p class="one-liner">A group movie-night picker that uses the TMDB API.</p>
     <div class="links">
@@ -24,9 +24,6 @@ const { url, caseStudyHref } = Astro.props;
   .card {
     max-inline-size: var(--measure);
     padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    background: var(--color-surface);
   }
 
   h3 {
