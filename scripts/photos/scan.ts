@@ -185,10 +185,20 @@ async function scanAlbum(
     }
   }
   const extras = new Map<string, { alt?: string | undefined; caption?: string | undefined }>();
+  const keyFor = new Map<string, string>();
   for (const [key, extra] of Object.entries(config.photos)) {
     const name = byLower.get(key.toLowerCase());
-    if (name === undefined) problems.push(`${label}: photos."${key}" is not a photo in this album`);
-    else extras.set(name, extra);
+    if (name === undefined) {
+      problems.push(`${label}: photos."${key}" is not a photo in this album`);
+      continue;
+    }
+    const earlier = keyFor.get(name);
+    if (earlier !== undefined) {
+      problems.push(`${label}: photos."${earlier}" and photos."${key}" both name ${name}`);
+      continue;
+    }
+    keyFor.set(name, key);
+    extras.set(name, extra);
   }
   if (problems.length > 0) return { problems };
 

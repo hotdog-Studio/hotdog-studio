@@ -201,6 +201,21 @@ describe('problems', () => {
     );
   });
 
+  it('reports photos keys that differ only in letter case', async () => {
+    await writeAlbum(root, 'iceland', {
+      'album.yaml': `${YAML}photos:
+  A.jpg:
+    alt: one
+  a.jpg:
+    alt: two
+`,
+      'a.jpg': '',
+    });
+    expect(await problemsOf()).toContain(
+      'iceland/album.yaml: photos."A.jpg" and photos."a.jpg" both name a.jpg',
+    );
+  });
+
   it('reports an album with no photos', async () => {
     await writeAlbum(root, 'iceland', { 'album.yaml': YAML });
     expect(await problemsOf()).toContain(
