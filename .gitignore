@@ -1,11 +1,54 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
 dist-fixtures/
 .astro/
-reports/
 src/generated/
 public/photos/
 .cache/
+
+# Test and quality reports
+reports/
 test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# Logs and tool caches
+*.log
+npm-debug.log*
+*.tsbuildinfo
+.eslintcache
+
+# Local environment and secrets
 .env
 .env.*
+
+# Photo originals never belong in git (spec §1, §5.5). They live in PHOTOS_DIR, outside the repo.
+# A local photos/ folder at the root, and RAW and HEIC files anywhere, are ignored as a guard.
+# The committed fixture photos are generated JPEGs in fixtures/photos/.
+/photos/
+*.[aA][rR][wW]
+*.[cC][rR][23]
+*.[nN][eE][fF]
+*.[dD][nN][gG]
+*.[rR][aA][fF]
+*.[oO][rR][fF]
+*.[hH][eE][iI][cC]
+*.[hH][eE][iI][fF]
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local agent state: git worktrees, Superpowers scratch space, personal Claude Code settings
+.worktrees/
+.superpowers/
+.claude/settings.local.json
