@@ -10,7 +10,7 @@ interface Props {
 const { album } = Astro.props;
 ---
 
-<section aria-labelledby="latest-photos-heading" class="stack">
+<section aria-labelledby="latest-photos-heading">
   <h2 id="latest-photos-heading">Latest photos</h2>
   <p>
     From <a href={albumHref(album.slug)}>{album.title}</a>, {formatAlbumDate(album.date)}.

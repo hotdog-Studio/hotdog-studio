@@ -179,8 +179,14 @@
     gap: var(--space-stack);
   }
 
-  .stack > :is(h1, h2) {
+  .stack > :is(h1, h2, p) {
     margin-block-end: 0;
+  }
+
+  /* Muted secondary line, such as an album's date and photo count. Scoped to p: the case study header's dl also uses the class name. */
+  p.meta {
+    margin: 0;
+    color: var(--color-text-muted);
   }
 
   /* One column at 320px. With auto-fill, one or two cards keep the card width rather than stretching. */
