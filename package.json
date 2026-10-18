@@ -6,9 +6,10 @@
     "node": ">=24.16.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "photos": "tsx scripts/photos/process.ts",
+    "dev": "tsx scripts/photos/process.ts --dev && astro dev",
     "check:content": "tsx scripts/content/check-case-studies.ts",
-    "build": "npm run check:content && astro build",
+    "build": "npm run check:content && npm run photos && astro build",
     "build:fixtures": "cross-env SITE_MODE=fixtures npm run build",
     "preview:fixtures": "cross-env SITE_MODE=fixtures astro preview --port 4321 --ignore-lock",
     "lint": "astro check && eslint . --max-warnings 0 && prettier --check . && tsx scripts/content/check-case-studies.ts src/content/work fixtures/content/work",
