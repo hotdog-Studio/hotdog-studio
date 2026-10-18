@@ -1,0 +1,24 @@
+---
+import site from '@site-config';
+import AlbumCard from '../../components/AlbumCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadPhotoManifest } from '../../lib/photo-manifest';
+import '../../generated/photo-placeholders.css';
+
+const { albums } = await loadPhotoManifest();
+---
+
+<BaseLayout title="Photos" description={`Photo albums by ${site.name}.`}>
+  <div class="stack">
+    <h1>Photos</h1>
+    {albums.length > 0 ? (
+      <div class="card-grid">
+        {albums.map((album, index) => (
+          <AlbumCard album={album} loading={index < 3 ? 'eager' : 'lazy'} />
+        ))}
+      </div>
+    ) : (
+      <p>No albums are published yet.</p>
+    )}
+  </div>
+</BaseLayout>

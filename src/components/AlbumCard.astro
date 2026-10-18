@@ -1,0 +1,93 @@
+---
+import {
+  COVER_SIZES,
+  albumHref,
+  coverPhoto,
+  formatAlbumDate,
+  formatPhotoCount,
+} from '../lib/photos';
+import type { Album } from '../lib/photos-schema';
+import ThumbnailPicture from './ThumbnailPicture.astro';
+
+interface Props {
+  album: Album;
+  loading: 'eager' | 'lazy';
+}
+
+const { album, loading } = Astro.props;
+---
+
+<article class="card panel">
+  <h2 class="title">
+    <a href={albumHref(album.slug)}>{album.title}</a>
+  </h2>
+  <p class="meta">
+    <time datetime={album.date}>{formatAlbumDate(album.date)}</time> ·{' '}
+    {formatPhotoCount(album.photos.length)}
+  </p>
+  <div class="cover">
+    <ThumbnailPicture photo={coverPhoto(album)} sizes={COVER_SIZES} loading={loading} />
+  </div>
+</article>
+
+<style>
+  /* The heading leads the DOM, for screen readers and the link; the cover leads visually. */
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.75rem 1rem;
+    overflow: hidden;
+    transition: border-color 150ms ease-out;
+  }
+
+  .card:hover {
+    border-color: var(--color-text-muted);
+  }
+
+  .cover {
+    order: -1;
+    margin-block-end: 0.25rem;
+    border-radius: calc(var(--radius) - 2px);
+    overflow: hidden;
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .title a {
+    color: var(--color-text);
+    text-decoration-line: none;
+  }
+
+  /* The link's box covers the card, so the whole card is the target, not just the title. */
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  .card:hover .title a,
+  .title a:focus-visible {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
+  .title a:focus-visible {
+    outline: none;
+  }
+
+  .title a:focus-visible::after {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .meta {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>

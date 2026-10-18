@@ -1,0 +1,37 @@
+---
+import { largestWebp, placeholderClass, srcset } from '../lib/photos';
+import type { Photo } from '../lib/photos-schema';
+
+interface Props {
+  photo: Photo;
+  sizes: string;
+  loading: 'eager' | 'lazy';
+}
+
+const { photo, sizes, loading } = Astro.props;
+---
+
+<picture>
+  <source type="image/avif" srcset={srcset(photo.sources.avif)} sizes={sizes} />
+  <source type="image/webp" srcset={srcset(photo.sources.webp)} sizes={sizes} />
+  <img
+    src={largestWebp(photo)}
+    width={photo.width}
+    height={photo.height}
+    alt={photo.alt}
+    loading={loading}
+    decoding="async"
+    class={`thumbnail ${placeholderClass(photo.id)}`}
+  />
+</picture>
+
+<style>
+  /* A uniform 3:2 crop whatever the photo's shape. The placeholder class paints the background. */
+  .thumbnail {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+</style>
